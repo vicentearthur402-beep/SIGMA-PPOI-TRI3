@@ -1,4 +1,3 @@
-const materias = [];
 const tabelaMaterias = document.getElementById("tabelaMaterias");
 const detalhesMaterias = document.getElementById("detalhesMaterias");
 
@@ -7,14 +6,17 @@ const matematica = {
   trimestre1: {
     nota1: 9.1,
     nota2: 9.6,
+    recuperacao: null,
   },
   trimestre2: {
     nota1: 2,
     nota2: 5,
+    recuperacao: 7,
   },
   trimestre3: {
     nota1: 3.5,
     nota2: 8,
+    recuperacao: null,
   },
 };
 
@@ -23,26 +25,30 @@ const historia = {
   trimestre1: {
     nota1: 8.5,
     nota2: 6.8,
+    recuperacao: null,
   },
   trimestre2: {
     nota1: 7.5,
     nota2: 10,
+    recuperacao: null,
   },
   trimestre3: {
     nota1: 6.0,
     nota2: 3.5,
+    recuperacao: null,
   },
 };
 
-materias.push(matematica);
-materias.push(historia);
+const materias = [matematica, historia];
 
 materias.forEach(function (materia) {
-  materia.mediaT1 = Number(calcularMedia(materia.trimestre1).toFixed(1));
-  materia.mediaT2 = Number(calcularMedia(materia.trimestre2).toFixed(1));
-  materia.mediaT3 = Number(calcularMedia(materia.trimestre3).toFixed(1));
-  materia.mediaFinal = Number(
-    calcularMediaFinal(materia.mediaT1, materia.mediaT2, materia.mediaT3),
+  materia.mediaT1 = calcularMedia(materia.trimestre1);
+  materia.mediaT2 = calcularMedia(materia.trimestre2);
+  materia.mediaT3 = calcularMedia(materia.trimestre3);
+  materia.mediaFinal = calcularMediaFinal(
+    materia.mediaT1,
+    materia.mediaT2,
+    materia.mediaT3,
   );
   materia.situacao = isAprovado(materia.mediaFinal);
 
@@ -53,19 +59,19 @@ materias.forEach(function (materia) {
   linha.appendChild(nomeMateria);
 
   const mediaT1 = document.createElement("td");
-  mediaT1.textContent = materia.mediaT1;
+  mediaT1.textContent = materia.mediaT1.toFixed(1);
   linha.appendChild(mediaT1);
 
   const mediaT2 = document.createElement("td");
-  mediaT2.textContent = materia.mediaT2;
+  mediaT2.textContent = materia.mediaT2.toFixed(1);
   linha.appendChild(mediaT2);
 
   const mediaT3 = document.createElement("td");
-  mediaT3.textContent = materia.mediaT3;
+  mediaT3.textContent = materia.mediaT3.toFixed(1);
   linha.appendChild(mediaT3);
 
   const mediaFinal = document.createElement("td");
-  mediaFinal.textContent = materia.mediaFinal;
+  mediaFinal.textContent = materia.mediaFinal.toFixed(1);
   linha.appendChild(mediaFinal);
 
   const situacao = document.createElement("td");
@@ -80,35 +86,32 @@ materias.forEach(function (materia) {
   resumo.textContent = materia.nome;
   detalhes.appendChild(resumo);
 
-  adicionarTrimestre(detalhes, materia.trimestre1, "1º Trimestre")
+  adicionarTrimestre(detalhes, materia.trimestre1, "1º Trimestre");
 
   const mediaT1Detalhes = document.createElement("p");
 
-  mediaT1Detalhes.textContent = `Média: ${materia.mediaT1.toFixed(1)} `
-  detalhes.appendChild(mediaT1Detalhes)
+  mediaT1Detalhes.textContent = `Média: ${materia.mediaT1.toFixed(1)} `;
+  detalhes.appendChild(mediaT1Detalhes);
 
-
-  adicionarTrimestre(detalhes, materia.trimestre2, "2º Trimestre")
+  adicionarTrimestre(detalhes, materia.trimestre2, "2º Trimestre");
 
   const mediaT2Detalhes = document.createElement("p");
-  mediaT2Detalhes.textContent = `Média: ${materia.mediaT2.toFixed(1)} `
-  detalhes.appendChild(mediaT2Detalhes)
+  mediaT2Detalhes.textContent = `Média: ${materia.mediaT2.toFixed(1)} `;
+  detalhes.appendChild(mediaT2Detalhes);
 
+  adicionarTrimestre(detalhes, materia.trimestre3, "3º Trimestre");
 
-  adicionarTrimestre(detalhes, materia.trimestre3, "3º Trimestre")
-  
   const mediaT3Detalhes = document.createElement("p");
-  mediaT3Detalhes.textContent = `Média: ${materia.mediaT3.toFixed(1)} `
-  detalhes.appendChild(mediaT3Detalhes)
+  mediaT3Detalhes.textContent = `Média: ${materia.mediaT3.toFixed(1)} `;
+  detalhes.appendChild(mediaT3Detalhes);
 
   const mediaFinalDetalhes = document.createElement("h4");
-  mediaFinalDetalhes.textContent = `Média Final: ${materia.mediaFinal.toFixed(1)}`
-  detalhes.appendChild(mediaFinalDetalhes)
+  mediaFinalDetalhes.textContent = `Média Final: ${materia.mediaFinal.toFixed(1)}`;
+  detalhes.appendChild(mediaFinalDetalhes);
 
   const situacaoF = document.createElement("p");
-  situacaoF.textContent = `Situação: ${materia.situacao}`
-  detalhes.appendChild(situacaoF)
-
+  situacaoF.textContent = `Situação: ${materia.situacao}`;
+  detalhes.appendChild(situacaoF);
 
   detalhesMaterias.appendChild(detalhes);
 });
@@ -116,20 +119,39 @@ materias.forEach(function (materia) {
 console.log(materias);
 
 function calcularMediaFinal(media1, media2, media3) {
-  const mFinal = ((media1 + media2 + media3) / 3).toFixed(1);
+  const mFinal = (media1 + media2 + media3) / 3;
   return mFinal;
 }
 
 function isAprovado(mediaFinal) {
   if (mediaFinal >= 6) {
-    return "Aprovado!";
+    return "Aprovado";
   } else {
-    return "Reprovado Doidaum";
+    return "Reprovado";
+  }
+}
+
+
+function calcularMediaNormal(trimestre){
+  const media = (trimestre.nota1 + trimestre.nota2) / 2
+  return media
+}
+
+function recuperacaoFoiAplicada(trimestre){
+  if(trimestre.recuperacao !== null && trimestre.recuperacao > calcularMediaNormal(trimestre)){
+    return true
+  } else {
+    return false
   }
 }
 
 function calcularMedia(trimestre) {
-  return (trimestre.nota1 + trimestre.nota2) / 2;
+  const media = calcularMediaNormal(trimestre);
+  if (trimestre.recuperacao !== null && trimestre.recuperacao > media) {
+    return trimestre.recuperacao;
+  } else {
+    return media;
+  }
 }
 
 function adicionarTrimestre(detalhes, trimestre, nomeTrimestre) {
@@ -137,10 +159,23 @@ function adicionarTrimestre(detalhes, trimestre, nomeTrimestre) {
   titulo.textContent = nomeTrimestre;
   detalhes.appendChild(titulo);
   const nota1 = document.createElement("p");
-  nota1.textContent = `Nota 1: ${trimestre.nota1.toFixed(1)}`
+  nota1.textContent = `Nota 1: ${trimestre.nota1.toFixed(1)}`;
   detalhes.appendChild(nota1);
 
   const nota2 = document.createElement("p");
-  nota2.textContent = `Nota 2: ${trimestre.nota2.toFixed(1)}`
-  detalhes.appendChild(nota2)
+  nota2.textContent = `Nota 2: ${trimestre.nota2.toFixed(1)}`;
+  detalhes.appendChild(nota2);
+  if(trimestre.recuperacao !== null){
+    const rec = document.createElement("p")
+    rec.textContent = `Recuperação: ${trimestre.recuperacao.toFixed(1)}`
+    detalhes.appendChild(rec)
+
+    if(recuperacaoFoiAplicada(trimestre)){
+      const aviso = document.createElement("p");
+      aviso.textContent = "Recuperação Aplicada";
+      detalhes.appendChild(aviso)
+    }
+
+  }
+
 }
