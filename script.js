@@ -4,8 +4,8 @@ const loginButton = document.getElementById("loginButton");
 const loginMessage = document.getElementById("loginMessage");
 const emailStudent = "123"
 const passwordStudent = "123"
-const emailTeacher = "Stanfordpines@proton.me"
-const passwordTeacher = "billchipermylove"
+const emailTeacher = "professor@escola.com"
+const passwordTeacher = "123"
 
 loginButton.addEventListener("click", function(){
   if (email.value === "" || password.value === "") {
@@ -13,11 +13,11 @@ loginButton.addEventListener("click", function(){
   } else {
     if(email.value.toLowerCase() === emailStudent.toLowerCase() && password.value === passwordStudent){
     loginMessage.textContent = "Login Realizado!";
-    window.location.href = "aluno.html";
+    window.location.href = "frontend/alunos/aluno.html";
     }
     else if(email.value.toLowerCase() === emailTeacher.toLowerCase() && password.value === passwordTeacher){
     loginMessage.textContent = "Login Realizado!";
-    window.location.href = "professor.html";
+    window.location.href = "frontend/professores/professor.html";
     }
     else {
       loginMessage.textContent = "Usuário não encontrado!"
