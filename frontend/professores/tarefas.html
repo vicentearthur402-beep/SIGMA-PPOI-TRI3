@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Tarefas</title>
+</head>
+<body>
+
+<header>
+    <h1>SIGMA</h1>
+    <h2>Gerenciar Tarefas</h2>
+</header>
+
+<main>
+  <label for="materia">Materia:</label>
+  <select id="materia">
+    <option value="">Selecione a matéria</option>
+    <option value="artes">Artes</option>
+    <option value="biologia">Biologia</option>
+    <option value="educacao-fisica">Educação Física</option>
+  </select>
+
+  <h3>Nova Tarefa</h3>
+
+<label for="titulo">Título:</label>
+<input type="text" id="titulo">
+
+<br><br>
+
+<label for="descricao">Descrição:</label>
+<textarea id="descricao"></textarea>
+
+<br><br>
+
+<label for="dataEntrega">Data:</label>
+<input type="date" id="dataEntrega">
+
+<br><br>
+
+<label for="horaEntrega">Hora:</label>
+<input type="time" id="horaEntrega">
+
+<br><br>
+
+<button id="publicarTarefa">Publicar Tarefa</button>
+
+<h3>Tarefas Publicadas</h3>
+
+<div id="listaTarefas"></div>
+
+
+</main>
+<script src="js/tarefas.js"></script>
+</body>
+</html>
