@@ -12,6 +12,66 @@ db.run(`
     `);
 
 db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('yasmin@sigma.com', '123456', 'aluno')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('lucas@sigma.com', '123456', 'aluno')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('samuel.lino@sigma.com', '123456', 'aluno')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('neymar@sigma.com', '123456', 'aluno')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('arrascaeta@sigma.com', '123456', 'aluno')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('daniel@sigma.com', '123456', 'aluno')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('andre@sigma.com', '123456', 'aluno')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('cleosbaldo@sigma.com', '123456', 'professor')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('felipe@sigma.com', '123456', 'professor')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('samuel.prof@sigma.com', '123456', 'professor')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('marcia@sigma.com', '123456', 'professor')
+`);
+
+db.run(`
+  INSERT OR IGNORE INTO users (email, password, role)
+  VALUES ('joao@sigma.com', '123456', 'professor')
+`);
+
+db.run(`
   CREATE TABLE IF NOT EXISTS students(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -41,21 +101,8 @@ db.run(`
     ('Artes'),
     ('Biologia'),
     ('Educação Física'),
-    ('Filosofia'),
-    ('Física'),
-    ('Geografia'),
-    ('História'),
     ('Língua Portuguesa'),
-    ('Matemática'),
-    ('Química'),
-    ('Sociologia'),
-    ('Programação'),
-    ('Banco de Dados'),
-    ('Engenharia de Software'),
-    ('Redes de Computadores'),
-    ('Prática Profissionalizante Orientada'),
-    ('Inglês'),
-    ('Python')
+    ('Matemática')
 `);
 
 db.run(`
