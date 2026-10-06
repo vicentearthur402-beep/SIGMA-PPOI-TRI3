@@ -2,9 +2,35 @@ const materia = document.getElementById("materia");
 const salvarNotas = document.getElementById("salvarNotas");
 const mensagemSalvamento = document.getElementById("mensagemSalvamento");
 
-const alunos = ["Lucas Gabriel Conti", "Arthur", "Samuel Lino", "Claudio"];
 
-alunos.sort();
+async function carregarMaterias() {
+  const resposta = await fetch("http://127.0.0.1:3000/materias", {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!resposta.ok) {
+    console.error("Erro ao carregar matérias:", resposta.status);
+    materia.innerHTML = '<option value="">Erro ao carregar matérias</option>';
+    return;
+  }
+
+  const materias = await resposta.json();
+
+  materia.innerHTML = '<option value="">Selecione uma matéria</option>';
+
+  materias.forEach(function (item) {
+    const opcao = document.createElement("option");
+    opcao.value = item.id;
+    opcao.textContent = item.name;
+    materia.appendChild(opcao);
+  });
+
+  console.log("Matérias carregadas:", materias);
+}
+
+carregarMaterias();
+
 
 const materias = {
   artes: "Artes",
@@ -17,8 +43,27 @@ const referenciasAlunos = {};
 
 const tabela = document.querySelector("tbody");
 
+let alunos = [];
+
+
+async function carregarAlunos() {
+  const resposta = await fetch("http://127.0.0.1:3000/alunos", {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!resposta.ok) {
+    console.error("Erro ao carregar alunos:", resposta.status);
+    return;
+  }
+
+  alunos = await resposta.json();
+
+  console.log("Alunos carregados:", alunos);
+
+
 alunos.forEach(function (aluno) {
-  referenciasAlunos[aluno] = {};
+  referenciasAlunos[aluno.name] = {};
   function calcularMedia() {
     const valorNota1 = Number(inputNota1.value);
     const valorNota2 = Number(inputNota2.value);
@@ -59,7 +104,7 @@ alunos.forEach(function (aluno) {
   const linha = document.createElement("tr");
 
   const nome = document.createElement("td");
-  nome.textContent = aluno;
+  nome.textContent = aluno.name;
   linha.appendChild(nome);
 
   const nota1 = document.createElement("td");
@@ -157,7 +202,8 @@ alunos.forEach(function (aluno) {
 
   linha.appendChild(mediaFinal);
 
-  referenciasAlunos[aluno] = {
+  referenciasAlunos[aluno.name] = {
+    studentId: aluno.id,
     inputNota1,
     inputNota2,
     inputRec1,
@@ -178,9 +224,9 @@ alunos.forEach(function (aluno) {
   materia.addEventListener("change", function () {
     if (
       notasPorMateria[materia.value] &&
-      notasPorMateria[materia.value][aluno]
+      notasPorMateria[materia.value][aluno.name]
     ) {
-      const notasAluno = notasPorMateria[materia.value][aluno];
+      const notasAluno = notasPorMateria[materia.value][aluno.name];
       console.log(notasAluno.primeiroTrimestre);
       inputNota1.value = notasAluno.primeiroTrimestre.nota1;
       inputNota2.value = notasAluno.primeiroTrimestre.nota2;
@@ -211,6 +257,9 @@ alunos.forEach(function (aluno) {
     }
   });
 });
+}
+
+carregarAlunos();
 
 salvarNotas.addEventListener("click", function () {
   const alunosSalvos = Object.keys(referenciasAlunos);

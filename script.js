@@ -6,9 +6,10 @@ const loginMessage = document.getElementById("loginMessage");
 loginButton.addEventListener("click", async function () {
   if (email.value === "" || password.value === "") {
     loginMessage.style.display = "block";
+    return;
   }
 
-  const resposta = await fetch("http://localhost:3000/login", {
+  const resposta = await fetch("http://127.0.0.1:3000/login", {
     method: "POST",
     credentials: "include",
     headers: {
@@ -23,10 +24,10 @@ loginButton.addEventListener("click", async function () {
     const dados = await resposta.json();
     console.log(dados.role);
     if (dados.role === "aluno") {
-      window.location.href = "frontend\\alunos\\aluno.html";
+      window.location.href = "frontend/alunos/aluno.html";
     }
     if (dados.role === "professor") {
-      window.location.href = "frontend\\professores\\professor.html";
+      window.location.href = "frontend/professores/professor.html";
     }
     loginMessage.textContent = "Login Realizado!";
   } else {

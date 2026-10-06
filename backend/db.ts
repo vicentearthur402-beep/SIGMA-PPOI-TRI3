@@ -169,3 +169,68 @@ db.run(`
     FOREIGN KEY (teacher_id) REFERENCES teachers(id)
   )
 `);
+
+db.run(`
+  INSERT INTO students (user_id, name)
+  SELECT id, 'Yasmin Conti' FROM users WHERE email = 'yasmin@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM students
+    WHERE user_id = (SELECT id FROM users WHERE email = 'yasmin@sigma.com')
+  )
+`);
+
+db.run(`
+  INSERT INTO students (user_id, name)
+  SELECT id, 'Lucas Gabriel Conti' FROM users WHERE email = 'lucas@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM students
+    WHERE user_id = (SELECT id FROM users WHERE email = 'lucas@sigma.com')
+  )
+`);
+
+
+db.run(`
+  INSERT INTO students (user_id, name)
+  SELECT id, 'Samuel Lino' FROM users WHERE email = 'samuel.lino@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM students
+    WHERE user_id = (SELECT id FROM users WHERE email = 'samuel.lino@sigma.com')
+  )
+`);
+
+db.run(`
+  INSERT INTO students (user_id, name)
+  SELECT id, 'Neymar' FROM users WHERE email = 'neymar@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM students
+    WHERE user_id = (SELECT id FROM users WHERE email = 'neymar@sigma.com')
+  )
+`);
+
+db.run(`
+  INSERT INTO students (user_id, name)
+  SELECT id, 'Arrascaeta' FROM users WHERE email = 'arrascaeta@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM students
+    WHERE user_id = (SELECT id FROM users WHERE email = 'arrascaeta@sigma.com')
+  )
+`);
+
+db.run(`
+  INSERT INTO students (user_id, name)
+  SELECT id, 'Daniel' FROM users WHERE email = 'daniel@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM students
+    WHERE user_id = (SELECT id FROM users WHERE email = 'daniel@sigma.com')
+  )
+`);
+
+db.run(`
+  INSERT INTO students (user_id, name)
+  SELECT id, 'André' FROM users WHERE email = 'andre@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM students
+    WHERE user_id = (SELECT id FROM users WHERE email = 'andre@sigma.com')
+  )
+`);
+
