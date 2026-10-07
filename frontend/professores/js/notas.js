@@ -261,7 +261,136 @@ alunos.forEach(function (aluno) {
 
 carregarAlunos();
 
-salvarNotas.addEventListener("click", function () {
+
+materia.addEventListener("change", async function () {
+  Object.values(referenciasAlunos).forEach(function (refs) {
+    refs.inputNota1.value = "";
+    refs.inputNota2.value = "";
+    refs.inputRec1.value = "";
+
+    refs.inputNota4.value = "";
+    refs.inputNota5.value = "";
+    refs.inputRec2.value = "";
+
+    refs.inputNota6.value = "";
+    refs.inputNota7.value = "";
+    refs.inputRec3.value = "";
+
+    refs.mediaFinal.textContent = "—";
+  });
+
+  if (materia.value === "") {
+    return;
+  }
+
+  try {
+    const resposta = await fetch(
+      `http://127.0.0.1:3000/notas?subjectId=${materia.value}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    if (!resposta.ok) {
+      throw new Error("Erro ao buscar notas: " + resposta.status);
+    }
+
+    const notas = await resposta.json();
+
+    notas.forEach(function (nota) {
+      const refs = Object.values(referenciasAlunos).find(
+        function (aluno) {
+          return aluno.studentId === nota.studentId;
+        }
+      );
+
+      if (!refs) return;
+
+      const campos = {
+        1: [refs.inputNota1, refs.inputNota2, refs.inputRec1],
+        2: [refs.inputNota4, refs.inputNota5, refs.inputRec2],
+        3: [refs.inputNota6, refs.inputNota7, refs.inputRec3],
+      };
+
+      const inputs = campos[nota.trimester];
+
+      if (!inputs) return;
+
+      inputs[0].value = nota.grade1 ?? "";
+      inputs[1].value = nota.grade2 ?? "";
+      inputs[2].value = nota.recovery ?? "";
+
+      refs.calcularMedia();
+    });
+  } catch (erro) {
+    console.error("Erro ao carregar notas:", erro);
+    mensagemSalvamento.textContent =
+      "Não foi possível carregar as notas.";
+  }
+});
+
+
+salvarNotas.addEventListener("click", async function () {
+  if (!materia.value) {
+    mensagemSalvamento.textContent = "Selecione uma matéria antes de salvar.";
+    return;
+  }
+  const notas = [];
+
+  alunos.forEach(function (aluno) {
+    const refs = referenciasAlunos[aluno.name];
+
+    notas.push({
+      studentId: refs.studentId,
+      trimester: 1,
+      grade1: refs.inputNota1.value === "" ? null : Number(refs.inputNota1.value),
+      grade2: refs.inputNota2.value === "" ? null : Number(refs.inputNota2.value),
+      recovery: refs.inputRec1.value === "" ? null : Number(refs.inputRec1.value),
+    },
+    {
+      studentId: refs.studentId,
+      trimester: 2,
+      grade1: refs.inputNota4.value === "" ? null : Number(refs.inputNota4.value),
+      grade2: refs.inputNota5.value === "" ? null : Number(refs.inputNota5.value),
+      recovery: refs.inputRec2.value === "" ? null : Number(refs.inputRec2.value),
+    },
+    {
+      studentId: refs.studentId,
+      trimester: 3,
+      grade1: refs.inputNota6.value === "" ? null : Number(refs.inputNota6.value),
+      grade2: refs.inputNota7.value === "" ? null : Number(refs.inputNota7.value),
+      recovery: refs.inputRec3.value === "" ? null : Number(refs.inputRec3.value),
+    });
+  });
+  console.log("notas preparadas para envio:", notas);
+
+  try {
+    const resposta = await fetch("http://127.0.0.1:3000/notas", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        subjectId: Number(materia.value),
+        notas: notas,
+      }),
+    });
+
+    const resultado = await resposta.json();
+
+    if (!resposta.ok) {
+      console.error("Erro ao salvar notas:", resultado);
+      mensagemSalvamento.textContent = "Erro ao salvar notas.";
+      return;
+    }
+    
+    mensagemSalvamento.textContent = resultado.message || "Notas salvas com sucesso!";
+  } catch (erro) {
+    console.error("Erro ao salvar notas:", erro);
+    mensagemSalvamento.textContent = "Erro ao salvar notas.";
+  }
   const alunosSalvos = Object.keys(referenciasAlunos);
   let haveWrongGrades = false;
 

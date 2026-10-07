@@ -261,6 +261,112 @@ Bun.serve({
         { headers: cabecalhos },
       );
     }
+  if (url.pathname === "/notas" && req.method === "GET") {
+    const usuario = buscarUsuario(req);
+
+    const cabecalhos = {
+      "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
+      "Access-Control-Allow-Credentials": "true",
+    };
+
+    if (!usuario) {
+      return new Response("Não autenticado", {
+        status: 401,
+        headers: cabecalhos,
+      });
+    }
+
+    if (usuario.role !== "professor") {
+      return new Response("Acesso negado", {
+        status: 403,
+        headers: cabecalhos,
+      });
+    }
+
+    const subjectId = Number(url.searchParams.get("subjectId"));
+
+    if (!Number.isInteger(subjectId) || subjectId <= 0) {
+      return new Response("ID da matéria inválido", {
+        status: 400,
+        headers: cabecalhos,
+      });
+    }
+
+const notas = db.query(`
+  SELECT
+    student_id AS "studentId",
+    trimester,
+    grade_1 AS "grade1",
+    grade_2 AS "grade2",
+    recovery
+  FROM grades
+  WHERE subject_id = ?
+  ORDER BY student_id, trimester
+`).all(subjectId);
+
+    return Response.json(notas, { headers: cabecalhos });
+  }
+
+  
+if (url.pathname === "/minhas-notas" && req.method === "GET") {
+  const usuario = buscarUsuario(req);
+
+  const cabecalhos = {
+    "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
+    "Access-Control-Allow-Credentials": "true",
+  };
+
+  if (!usuario) {
+    return new Response("Não autenticado", {
+      status: 401,
+      headers: cabecalhos,
+    });
+  }
+
+  if (usuario.role !== "aluno") {
+    return new Response("Acesso permitido somente para alunos", {
+      status: 403,
+      headers: cabecalhos,
+    });
+  }
+
+  const aluno = db
+    .query("SELECT id FROM students WHERE user_id = ?")
+    .get(usuario.id);
+
+  if (!aluno) {
+    return new Response("Aluno não encontrado", {
+      status: 404,
+      headers: cabecalhos,
+    });
+  }
+
+const notas = db.query(`
+  SELECT
+    subjects.id AS subjectId,
+    subjects.name AS subject,
+    trimestres.trimester AS trimester,
+    grades.grade_1 AS grade1,
+    grades.grade_2 AS grade2,
+    grades.recovery AS recovery
+  FROM subjects
+  CROSS JOIN (
+    SELECT 1 AS trimester
+    UNION ALL SELECT 2
+    UNION ALL SELECT 3
+  ) AS trimestres
+  LEFT JOIN grades
+    ON grades.subject_id = subjects.id
+    AND grades.student_id = ?
+    AND grades.trimester = trimestres.trimester
+  ORDER BY subjects.name, trimestres.trimester
+`).all(aluno.id);
+
+  return Response.json(notas, {
+    headers: cabecalhos,
+  });
+}
+
 
     return new Response("Sigma ta funcionando");
   },
