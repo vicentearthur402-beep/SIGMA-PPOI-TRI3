@@ -261,38 +261,40 @@ Bun.serve({
         { headers: cabecalhos },
       );
     }
-  if (url.pathname === "/notas" && req.method === "GET") {
-    const usuario = buscarUsuario(req);
+    if (url.pathname === "/notas" && req.method === "GET") {
+      const usuario = buscarUsuario(req);
 
-    const cabecalhos = {
-      "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
-      "Access-Control-Allow-Credentials": "true",
-    };
+      const cabecalhos = {
+        "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
+        "Access-Control-Allow-Credentials": "true",
+      };
 
-    if (!usuario) {
-      return new Response("Não autenticado", {
-        status: 401,
-        headers: cabecalhos,
-      });
-    }
+      if (!usuario) {
+        return new Response("Não autenticado", {
+          status: 401,
+          headers: cabecalhos,
+        });
+      }
 
-    if (usuario.role !== "professor") {
-      return new Response("Acesso negado", {
-        status: 403,
-        headers: cabecalhos,
-      });
-    }
+      if (usuario.role !== "professor") {
+        return new Response("Acesso negado", {
+          status: 403,
+          headers: cabecalhos,
+        });
+      }
 
-    const subjectId = Number(url.searchParams.get("subjectId"));
+      const subjectId = Number(url.searchParams.get("subjectId"));
 
-    if (!Number.isInteger(subjectId) || subjectId <= 0) {
-      return new Response("ID da matéria inválido", {
-        status: 400,
-        headers: cabecalhos,
-      });
-    }
+      if (!Number.isInteger(subjectId) || subjectId <= 0) {
+        return new Response("ID da matéria inválido", {
+          status: 400,
+          headers: cabecalhos,
+        });
+      }
 
-const notas = db.query(`
+      const notas = db
+        .query(
+          `
   SELECT
     student_id AS "studentId",
     trimester,
@@ -302,46 +304,49 @@ const notas = db.query(`
   FROM grades
   WHERE subject_id = ?
   ORDER BY student_id, trimester
-`).all(subjectId);
+`,
+        )
+        .all(subjectId);
 
-    return Response.json(notas, { headers: cabecalhos });
-  }
+      return Response.json(notas, { headers: cabecalhos });
+    }
 
-  
-if (url.pathname === "/minhas-notas" && req.method === "GET") {
-  const usuario = buscarUsuario(req);
+    if (url.pathname === "/minhas-notas" && req.method === "GET") {
+      const usuario = buscarUsuario(req);
 
-  const cabecalhos = {
-    "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
-    "Access-Control-Allow-Credentials": "true",
-  };
+      const cabecalhos = {
+        "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
+        "Access-Control-Allow-Credentials": "true",
+      };
 
-  if (!usuario) {
-    return new Response("Não autenticado", {
-      status: 401,
-      headers: cabecalhos,
-    });
-  }
+      if (!usuario) {
+        return new Response("Não autenticado", {
+          status: 401,
+          headers: cabecalhos,
+        });
+      }
 
-  if (usuario.role !== "aluno") {
-    return new Response("Acesso permitido somente para alunos", {
-      status: 403,
-      headers: cabecalhos,
-    });
-  }
+      if (usuario.role !== "aluno") {
+        return new Response("Acesso permitido somente para alunos", {
+          status: 403,
+          headers: cabecalhos,
+        });
+      }
 
-  const aluno = db
-    .query("SELECT id FROM students WHERE user_id = ?")
-    .get(usuario.id);
+      const aluno = db
+        .query("SELECT id FROM students WHERE user_id = ?")
+        .get(usuario.id);
 
-  if (!aluno) {
-    return new Response("Aluno não encontrado", {
-      status: 404,
-      headers: cabecalhos,
-    });
-  }
+      if (!aluno) {
+        return new Response("Aluno não encontrado", {
+          status: 404,
+          headers: cabecalhos,
+        });
+      }
 
-const notas = db.query(`
+      const notas = db
+        .query(
+          `
   SELECT
     subjects.id AS subjectId,
     subjects.name AS subject,
@@ -360,16 +365,98 @@ const notas = db.query(`
     AND grades.student_id = ?
     AND grades.trimester = trimestres.trimester
   ORDER BY subjects.name, trimestres.trimester
-`).all(aluno.id);
+`,
+        )
+        .all(aluno.id);
 
-  return Response.json(notas, {
-    headers: cabecalhos,
-  });
-}
-
+      return Response.json(notas, {
+        headers: cabecalhos,
+      });
+    }
 
     return new Response("Sigma ta funcionando");
   },
 });
+
+if (url.pathname === "/tarefas" && req.method === "POST") {
+  const usuario = buscarUsuario(req);
+
+  const cabecalhos = {
+    "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
+    "Access-Control-Allow-Credentials": "true",
+  };
+
+  if (!usuario) {
+    return new Response("Não autenticado", {
+      status: 401,
+      headers: cabecalhos,
+    });
+  }
+
+  if (usuario.role !== "professor") {
+    return new Response("Acesso negado", {
+      status: 403,
+      headers: cabecalhos,
+    });
+  }
+
+  const professor = db
+    .query("SELECT id FROM teachers WHERE user_id = ?")
+    .get(usuario.id);
+
+  if (!professor) {
+    return new Response("Cadastro do professor não encontrado", {
+      status: 404,
+      headers: cabecalhos,
+    });
+  }
+
+  const dados = await req.json();
+  const { subjectId, title, description, dueDate, dueTime } = dados;
+
+  if (
+    !Number.isInteger(Number(subjectId)) ||
+    !title?.trim() ||
+    !description?.trim() ||
+    !dueDate ||
+    !dueTime
+  ) {
+    return new Response("Preencha todos os campos corretamente", {
+      status: 400,
+      headers: cabecalhos,
+    });
+  }
+
+  const materiaExiste = db
+    .query("SELECT id FROM subjects WHERE id = ?")
+    .get(Number(subjectId));
+
+  if (!materiaExiste) {
+    return new Response("Matéria não encontrada", {
+      status: 400,
+      headers: cabecalhos,
+    });
+  }
+
+  db.query(
+    `
+    INSERT INTO tasks
+      (teacher_id, subject_id, title, description, due_date, due_time)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `,
+  ).run(
+    professor.id,
+    Number(subjectId),
+    title.trim(),
+    description.trim(),
+    dueDate,
+    dueTime,
+  );
+
+  return Response.json(
+    { mensagem: "Tarefa publicada com sucesso!" },
+    { headers: cabecalhos },
+  );
+}
 
 console.log("Servidor rodando em http://localhost:3000");

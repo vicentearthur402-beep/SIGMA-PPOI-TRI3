@@ -71,6 +71,8 @@ db.run(`
   VALUES ('joao@sigma.com', '123456', 'professor')
 `);
 
+
+
 db.run(`
   CREATE TABLE IF NOT EXISTS students(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -231,6 +233,67 @@ db.run(`
   AND NOT EXISTS (
     SELECT 1 FROM students
     WHERE user_id = (SELECT id FROM users WHERE email = 'andre@sigma.com')
+  )
+`);
+
+
+db.run(`
+  INSERT INTO teachers (user_id, name)
+  SELECT id, 'Cleosbaldo' FROM users
+  WHERE email = 'cleosbaldo@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM teachers
+    WHERE user_id = (
+      SELECT id FROM users WHERE email = 'cleosbaldo@sigma.com'
+    )
+  )
+`);
+
+db.run(`
+  INSERT INTO teachers (user_id, name)
+  SELECT id, 'Felipe' FROM users
+  WHERE email = 'felipe@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM teachers
+    WHERE user_id = (
+      SELECT id FROM users WHERE email = 'felipe@sigma.com'
+    )
+  )
+`);
+
+db.run(`
+  INSERT INTO teachers (user_id, name)
+  SELECT id, 'Samuel' FROM users
+  WHERE email = 'samuel.prof@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM teachers
+    WHERE user_id = (
+      SELECT id FROM users WHERE email = 'samuel.prof@sigma.com'
+    )
+  )
+`);
+
+db.run(`
+  INSERT INTO teachers (user_id, name)
+  SELECT id, 'Marcia' FROM users
+  WHERE email = 'marcia@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM teachers
+    WHERE user_id = (
+      SELECT id FROM users WHERE email = 'marcia@sigma.com'
+    )
+  )
+`);
+
+db.run(`
+  INSERT INTO teachers (user_id, name)
+  SELECT id, 'João' FROM users
+  WHERE email = 'joao@sigma.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM teachers
+    WHERE user_id = (
+      SELECT id FROM users WHERE email = 'joao@sigma.com'
+    )
   )
 `);
 
