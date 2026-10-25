@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <link rel="stylesheet" href="css/professor.css">
     <title>Área do Professor</title>
   </head>
 
@@ -12,6 +12,7 @@
       <h1>SIGMA</h1>
       <h2>Área do Professor</h2>
     </header>
+    <h2 id="saudacao">Olá!</h2>
 
     <main>
       <a href="notas.html">
@@ -35,5 +36,28 @@
         </section>
       </a>
     </main>
+    <script>
+      async function carregarUsuario() {
+        try {
+          const resposta = await fetch("/me", {
+            credentials: "include",
+          });
+
+          if (!resposta.ok) {
+            window.location.href = "/";
+            return;
+          }
+
+          const usuario = await resposta.json();
+
+          document.getElementById("saudacao").textContent =
+            `Olá, ${usuario.nome}!`;
+        } catch (erro) {
+          console.error("Erro ao carregar usuário:", erro);
+        }
+      }
+
+      carregarUsuario();
+    </script>
   </body>
 </html>

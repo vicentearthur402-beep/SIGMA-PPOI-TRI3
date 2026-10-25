@@ -1,9 +1,8 @@
-
 import { db } from "./db";
 import { mkdir } from "node:fs/promises";
+import { resolve, sep } from "node:path";
 
 const sessoes = new Map<string, number>();
-
 
 function buscarUsuario(req: Request) {
   console.log("ENTREI EM buscarUsuario");
@@ -33,13 +32,13 @@ function buscarUsuario(req: Request) {
     return null;
   }
 
-  return db
-    .query("SELECT * FROM users WHERE id = ?")
-    .get(idUsuario) as
-    | { id: number; email: string; password: string; role: string }
-    | null;
+  return db.query("SELECT * FROM users WHERE id = ?").get(idUsuario) as {
+    id: number;
+    email: string;
+    password: string;
+    role: string;
+  } | null;
 }
-
 
 const cabecalhos = {
   "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
@@ -58,109 +57,182 @@ Bun.serve({
 
   async fetch(req) {
     const url = new URL(req.url);
+    // DADOS DO USUÁRIO CONECTADO
+    if (req.method === "GET" && url.pathname === "/me") {
+      const usuario = buscarUsuario(req);
 
+      if (!usuario) {
+        return respostaErro("Não autenticado", 401);
+      }
+
+      let pessoa: { name: string } | null;
+
+      if (usuario.role === "aluno") {
+        pessoa = db
+          .query(
+            `
+      SELECT name
+      FROM students
+      WHERE user_id = ?
+    `,
+          )
+          .get(usuario.id) as { name: string } | null;
+      } else if (usuario.role === "professor") {
+        pessoa = db
+          .query(
+            `
+      SELECT name
+      FROM teachers
+      WHERE user_id = ?
+    `,
+          )
+          .get(usuario.id) as { name: string } | null;
+      } else {
+        return respostaErro("Perfil inválido", 403);
+      }
+
+      if (!pessoa) {
+        return respostaErro("Perfil não encontrado", 404);
+      }
+
+      return Response.json(
+        {
+          nome: pessoa.name,
+          perfil: usuario.role,
+        },
+        { headers: cabecalhos },
+      );
+    }
     // CORS
     if (req.method === "OPTIONS") {
       return new Response(null, {
         headers: {
           ...cabecalhos,
-          "Access-Control-Allow-Methods":
-            "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type",
         },
       });
     }
     // ENVIAR TRABALHO
-if (
-  req.method === "POST" &&
-  /^\/tarefas\/\d+\/envios$/.test(url.pathname)
-) {
-  const usuario = buscarUsuario(req);
+    if (
+      req.method === "POST" &&
+      /^\/tarefas\/\d+\/envios$/.test(url.pathname)
+    ) {
+      const usuario = buscarUsuario(req);
 
-  if (!usuario) {
-    return respostaErro("Não autenticado", 401);
-  }
+      if (!usuario) {
+        return respostaErro("Não autenticado", 401);
+      }
 
-  if (usuario.role !== "aluno") {
-    return respostaErro("Acesso permitido somente para alunos", 403);
-  }
+      if (usuario.role !== "aluno") {
+        return respostaErro("Acesso permitido somente para alunos", 403);
+      }
 
-  const tarefaId = Number(url.pathname.split("/")[2]);
+      const tarefaId = Number(url.pathname.split("/")[2]);
 
-  const aluno = db
-    .query("SELECT id FROM students WHERE user_id = ?")
-    .get(usuario.id) as { id: number } | null;
+      const aluno = db
+        .query("SELECT id FROM students WHERE user_id = ?")
+        .get(usuario.id) as { id: number } | null;
 
-  if (!aluno) {
-    return respostaErro("Aluno não encontrado", 404);
-  }
+      if (!aluno) {
+        return respostaErro("Aluno não encontrado", 404);
+      }
 
-  const tarefa = db
-    .query("SELECT id FROM tasks WHERE id = ?")
-    .get(tarefaId);
+      const tarefa = db
+        .query(
+          `
+    SELECT id, due_date, due_time
+    FROM tasks
+    WHERE id = ?
+  `,
+        )
+        .get(tarefaId) as {
+        id: number;
+        due_date: string;
+        due_time: string;
+      } | null;
 
-  if (!tarefa) {
-    return respostaErro("Tarefa não encontrada", 404);
-  }
+      if (!tarefa) {
+        return respostaErro("Tarefa não encontrada", 404);
+      }
 
-  const formulario = await req.formData();
-  const arquivo = formulario.get("arquivo");
+      // VERIFICAR PRAZO DE ENTREGA
+      const prazo = new Date(`${tarefa.due_date}T${tarefa.due_time}:00`);
 
-  if (!(arquivo instanceof File) || arquivo.size === 0) {
-    return respostaErro("Selecione um arquivo válido", 400);
-  }
+      if (Number.isNaN(prazo.getTime())) {
+        return respostaErro("Prazo da tarefa inválido", 500);
+      }
 
-  // Limite de 10 MB
-  if (arquivo.size > 10 * 1024 * 1024) {
-    return respostaErro("O arquivo deve ter no máximo 10 MB", 400);
-  }
+      if (Date.now() >= prazo.getTime()) {
+        return respostaErro(
+          "Prazo encerrado! Não é mais possível enviar esta tarefa.",
+          403,
+        );
+      }
 
-  const pasta = "backend/uploads";
-  await mkdir(pasta, { recursive: true });
+      const formulario = await req.formData();
+      const arquivo = formulario.get("arquivo");
 
-  const nomeOriginal = arquivo.name.replace(/[/\\]/g, "_");
-  const nomeArmazenado = `${crypto.randomUUID()}-${nomeOriginal}`;
-  const caminho = `${pasta}/${nomeArmazenado}`;
+      if (!(arquivo instanceof File) || arquivo.size === 0) {
+        return respostaErro("Selecione um arquivo válido", 400);
+      }
 
-  await Bun.write(caminho, arquivo);
+      // Limite de 10 MB
+      if (arquivo.size > 10 * 1024 * 1024) {
+        return respostaErro("O arquivo deve ter no máximo 10 MB", 400);
+      }
 
-  try {
-    db.query(`
+      const pasta = "backend/uploads";
+      await mkdir(pasta, { recursive: true });
+
+      const nomeOriginal = arquivo.name.replace(/[/\\]/g, "_");
+      const nomeArmazenado = `${crypto.randomUUID()}-${nomeOriginal}`;
+      const caminho = `${pasta}/${nomeArmazenado}`;
+
+      await Bun.write(caminho, arquivo);
+
+      try {
+        db.query(
+          `
       INSERT INTO submissions
         (task_id, student_id, file_name, file_path, submitted_at)
       VALUES (?, ?, ?, ?, ?)
-    `).run(
-      tarefaId,
-      aluno.id,
-      nomeOriginal,
-      caminho,
-      new Date().toISOString()
-    );
-  } catch (erro) {
-    // Evita deixar arquivo órfão caso o registro falhe.
-    await Bun.file(caminho).delete();
-    console.error(erro);
-    return respostaErro("Não foi possível registrar a entrega", 500);
-  }
+    `,
+        ).run(
+          tarefaId,
+          aluno.id,
+          nomeOriginal,
+          caminho,
+          new Date().toISOString(),
+        );
+      } catch (erro) {
+        // Evita deixar arquivo órfão caso o registro falhe.
+        await Bun.file(caminho).delete();
+        console.error(erro);
+        return respostaErro("Não foi possível registrar a entrega", 500);
+      }
 
-  return Response.json(
-    { mensagem: "Trabalho enviado com sucesso!" },
-    { headers: cabecalhos }
-  );
-}
+      return Response.json(
+        { mensagem: "Trabalho enviado com sucesso!" },
+        { headers: cabecalhos },
+      );
+    }
 
     // LOGIN
     if (url.pathname === "/login" && req.method === "POST") {
-      const dados = await req.json() as {
+      const dados = (await req.json()) as {
         email: string;
         password: string;
       };
 
       const usuario = db
         .query("SELECT * FROM users WHERE email = ?")
-        .get(dados.email) as
-        | { id: number; email: string; password: string; role: string }
-        | null;
+        .get(dados.email) as {
+        id: number;
+        email: string;
+        password: string;
+        role: string;
+      } | null;
 
       if (!usuario) {
         return respostaErro("Usuário não encontrado", 401);
@@ -181,8 +253,7 @@ if (
         {
           headers: {
             ...cabecalhos,
-            "Set-Cookie":
-              `sessao=${idSessao}; HttpOnly; Path=/; SameSite=Lax`,
+            "Set-Cookie": `sessao=${idSessao}; HttpOnly; Path=/; SameSite=Lax`,
           },
         },
       );
@@ -238,7 +309,7 @@ if (
         return respostaErro("Acesso negado", 403);
       }
 
-      const dados = await req.json() as {
+      const dados = (await req.json()) as {
         subjectId: number;
         notas: {
           studentId: number;
@@ -251,10 +322,7 @@ if (
 
       const subjectId = Number(dados.subjectId);
 
-      if (
-        !Number.isInteger(subjectId) ||
-        !Array.isArray(dados.notas)
-      ) {
+      if (!Number.isInteger(subjectId) || !Array.isArray(dados.notas)) {
         return respostaErro("Dados inválidos", 400);
       }
 
@@ -270,10 +338,7 @@ if (
         const studentId = Number(nota.studentId);
         const trimester = Number(nota.trimester);
 
-        if (
-          !Number.isInteger(studentId) ||
-          ![1, 2, 3].includes(trimester)
-        ) {
+        if (!Number.isInteger(studentId) || ![1, 2, 3].includes(trimester)) {
           return respostaErro("Aluno ou trimestre inválido", 400);
         }
 
@@ -285,11 +350,7 @@ if (
           return respostaErro("Aluno não encontrado", 400);
         }
 
-        for (const valor of [
-          nota.grade1,
-          nota.grade2,
-          nota.recovery,
-        ]) {
+        for (const valor of [nota.grade1, nota.grade2, nota.recovery]) {
           if (
             valor !== null &&
             valor !== undefined &&
@@ -298,42 +359,43 @@ if (
               valor < 0 ||
               valor > 10)
           ) {
-            return respostaErro(
-              "Notas devem estar entre 0 e 10",
-              400,
-            );
+            return respostaErro("Notas devem estar entre 0 e 10", 400);
           }
         }
 
         const existente = db
-          .query(`
+          .query(
+            `
             SELECT id FROM grades
             WHERE student_id = ?
               AND subject_id = ?
               AND trimester = ?
-          `)
-          .get(studentId, subjectId, trimester) as
-          | { id: number }
-          | null;
+          `,
+          )
+          .get(studentId, subjectId, trimester) as { id: number } | null;
 
         if (existente) {
-          db.query(`
+          db.query(
+            `
             UPDATE grades
             SET grade_1 = ?, grade_2 = ?, recovery = ?
             WHERE id = ?
-          `).run(
+          `,
+          ).run(
             nota.grade1 ?? null,
             nota.grade2 ?? null,
             nota.recovery ?? null,
             existente.id,
           );
         } else {
-          db.query(`
+          db.query(
+            `
             INSERT INTO grades
               (student_id, subject_id, trimester,
                grade_1, grade_2, recovery)
             VALUES (?, ?, ?, ?, ?, ?)
-          `).run(
+          `,
+          ).run(
             studentId,
             subjectId,
             trimester,
@@ -362,15 +424,15 @@ if (
         return respostaErro("Acesso negado", 403);
       }
 
-      const subjectId = Number(
-        url.searchParams.get("subjectId"),
-      );
+      const subjectId = Number(url.searchParams.get("subjectId"));
 
       if (!Number.isInteger(subjectId) || subjectId <= 0) {
         return respostaErro("ID da matéria inválido", 400);
       }
 
-      const notas = db.query(`
+      const notas = db
+        .query(
+          `
         SELECT
           student_id AS studentId,
           trimester,
@@ -380,16 +442,15 @@ if (
         FROM grades
         WHERE subject_id = ?
         ORDER BY student_id, trimester
-      `).all(subjectId);
+      `,
+        )
+        .all(subjectId);
 
       return Response.json(notas, { headers: cabecalhos });
     }
 
     // NOTAS DO ALUNO LOGADO
-    if (
-      url.pathname === "/minhas-notas" &&
-      req.method === "GET"
-    ) {
+    if (url.pathname === "/minhas-notas" && req.method === "GET") {
       const usuario = buscarUsuario(req);
 
       if (!usuario) {
@@ -397,10 +458,7 @@ if (
       }
 
       if (usuario.role !== "aluno") {
-        return respostaErro(
-          "Acesso permitido somente para alunos",
-          403,
-        );
+        return respostaErro("Acesso permitido somente para alunos", 403);
       }
 
       const aluno = db
@@ -411,7 +469,9 @@ if (
         return respostaErro("Aluno não encontrado", 404);
       }
 
-      const notas = db.query(`
+      const notas = db
+        .query(
+          `
         SELECT
           subjects.id AS subjectId,
           subjects.name AS subject,
@@ -430,29 +490,30 @@ if (
           AND grades.student_id = ?
           AND grades.trimester = trimestres.trimester
         ORDER BY subjects.name, trimestres.trimester
-      `).all(aluno.id);
+      `,
+        )
+        .all(aluno.id);
 
       return Response.json(notas, { headers: cabecalhos });
     }
     // GET /minhas-tarefas
     // BAIXAR ARQUIVO DE UMA ENTREGA
-if (
-  req.method === "GET" &&
-  /^\/envios\/\d+\/arquivo$/.test(url.pathname)
-) {
-  const usuario = buscarUsuario(req);
+    if (req.method === "GET" && /^\/envios\/\d+\/arquivo$/.test(url.pathname)) {
+      const usuario = buscarUsuario(req);
 
-  if (!usuario) {
-    return respostaErro("Não autenticado", 401);
-  }
+      if (!usuario) {
+        return respostaErro("Não autenticado", 401);
+      }
 
-  if (usuario.role !== "professor") {
-    return respostaErro("Acesso permitido somente para professores", 403);
-  }
+      if (usuario.role !== "professor") {
+        return respostaErro("Acesso permitido somente para professores", 403);
+      }
 
-  const envioId = Number(url.pathname.split("/")[2]);
+      const envioId = Number(url.pathname.split("/")[2]);
 
-  const envio = db.query(`
+      const envio = db
+        .query(
+          `
     SELECT
       submissions.file_path,
       submissions.file_name
@@ -463,44 +524,47 @@ if (
       ON teachers.id = tasks.teacher_id
     WHERE submissions.id = ?
       AND teachers.user_id = ?
-  `).get(envioId, usuario.id) as {
-    file_path: string;
-    file_name: string;
-  } | null;
+  `,
+        )
+        .get(envioId, usuario.id) as {
+        file_path: string;
+        file_name: string;
+      } | null;
 
-  if (!envio) {
-    return respostaErro("Entrega não encontrada", 404);
-  }
+      if (!envio) {
+        return respostaErro("Entrega não encontrada", 404);
+      }
 
-  const arquivo = Bun.file(envio.file_path);
+      const arquivo = Bun.file(envio.file_path);
 
-  if (!(await arquivo.exists())) {
-    return respostaErro("Arquivo não encontrado no servidor", 404);
-  }
+      if (!(await arquivo.exists())) {
+        return respostaErro("Arquivo não encontrado no servidor", 404);
+      }
 
-  const nomeSeguro = envio.file_name.replace(/["\r\n]/g, "_");
+      const nomeSeguro = envio.file_name.replace(/["\r\n]/g, "_");
 
-  return new Response(arquivo, {
-    headers: {
-      ...cabecalhos,
-      "Content-Type": "application/octet-stream",
-      "Content-Disposition":
-        `attachment; filename="${nomeSeguro}"`,
-    },
-  });
-}
-if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
-  const usuario = buscarUsuario(req);
+      return new Response(arquivo, {
+        headers: {
+          ...cabecalhos,
+          "Content-Type": "application/octet-stream",
+          "Content-Disposition": `attachment; filename="${nomeSeguro}"`,
+        },
+      });
+    }
+    if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
+      const usuario = buscarUsuario(req);
 
-  if (!usuario) {
-    return respostaErro("Não autenticado", 401);
-  }
+      if (!usuario) {
+        return respostaErro("Não autenticado", 401);
+      }
 
-  if (usuario.role !== "aluno") {
-    return respostaErro("Acesso permitido somente para alunos", 403);
-  }
+      if (usuario.role !== "aluno") {
+        return respostaErro("Acesso permitido somente para alunos", 403);
+      }
 
-  const tarefas = db.query(`
+      const tarefas = db
+        .query(
+          `
     SELECT
       tasks.id AS id,
       subjects.name AS materia,
@@ -513,16 +577,15 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
     JOIN subjects ON subjects.id = tasks.subject_id
     JOIN teachers ON teachers.id = tasks.teacher_id
     ORDER BY tasks.due_date ASC, tasks.due_time ASC
-  `).all();
+  `,
+        )
+        .all();
 
-  return Response.json(tarefas, { headers: cabecalhos });
-}
+      return Response.json(tarefas, { headers: cabecalhos });
+    }
 
     // PUBLICAR TAREFA
-    if (
-      url.pathname === "/tarefas" &&
-      req.method === "POST"
-    ) {
+    if (url.pathname === "/tarefas" && req.method === "POST") {
       const usuario = buscarUsuario(req);
 
       if (!usuario) {
@@ -538,13 +601,10 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         .get(usuario.id) as { id: number } | null;
 
       if (!professor) {
-        return respostaErro(
-          "Cadastro do professor não encontrado",
-          404,
-        );
+        return respostaErro("Cadastro do professor não encontrado", 404);
       }
 
-      const dados = await req.json() as {
+      const dados = (await req.json()) as {
         subjectId: number;
         title: string;
         description: string;
@@ -561,10 +621,7 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         !dados.dueDate ||
         !dados.dueTime
       ) {
-        return respostaErro(
-          "Preencha todos os campos corretamente",
-          400,
-        );
+        return respostaErro("Preencha todos os campos corretamente", 400);
       }
 
       const materiaExiste = db
@@ -575,12 +632,14 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         return respostaErro("Matéria não encontrada", 400);
       }
 
-      db.query(`
+      db.query(
+        `
         INSERT INTO tasks
           (teacher_id, subject_id, title, description,
            due_date, due_time)
         VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
+      `,
+      ).run(
         professor.id,
         subjectId,
         dados.title.trim(),
@@ -594,12 +653,9 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         { headers: cabecalhos },
       );
     }
-    
+
     // LISTAR ENTREGAS DE UMA TAREFA
-    if (
-      req.method === "GET" &&
-      /^\/tarefas\/\d+\/envios$/.test(url.pathname)
-    ) {
+    if (req.method === "GET" && /^\/tarefas\/\d+\/envios$/.test(url.pathname)) {
       const usuario = buscarUsuario(req);
 
       if (!usuario) {
@@ -612,19 +668,25 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
 
       const tarefaId = Number(url.pathname.split("/")[2]);
 
-      const tarefa = db.query(`
+      const tarefa = db
+        .query(
+          `
         SELECT id FROM tasks
         WHERE id = ?
           AND teacher_id IN (
             SELECT id FROM teachers WHERE user_id = ?
           )
-      `).get(tarefaId, usuario.id);
+      `,
+        )
+        .get(tarefaId, usuario.id);
 
       if (!tarefa) {
         return respostaErro("Tarefa não encontrada", 404);
       }
 
-      const envios = db.query(`
+      const envios = db
+        .query(
+          `
         SELECT
           submissions.id,
           students.name AS aluno,
@@ -634,16 +696,15 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         JOIN students ON students.id = submissions.student_id
         WHERE submissions.task_id = ?
         ORDER BY submissions.submitted_at DESC
-      `).all(tarefaId);
+      `,
+        )
+        .all(tarefaId);
 
       return Response.json(envios, { headers: cabecalhos });
     }
 
     // LISTAR TAREFAS DO PROFESSOR LOGADO
-    if (
-      url.pathname === "/tarefas" &&
-      req.method === "GET"
-    ) {
+    if (url.pathname === "/tarefas" && req.method === "GET") {
       const usuario = buscarUsuario(req);
 
       if (!usuario) {
@@ -654,7 +715,9 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         return respostaErro("Acesso negado", 403);
       }
 
-      const tarefas = db.query(`
+      const tarefas = db
+        .query(
+          `
         SELECT
           tasks.id AS id,
           tasks.subject_id AS subjectId,
@@ -668,16 +731,15 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         JOIN subjects ON subjects.id = tasks.subject_id
         WHERE teachers.user_id = ?
         ORDER BY tasks.due_date, tasks.due_time
-      `).all(usuario.id);
+      `,
+        )
+        .all(usuario.id);
 
       return Response.json(tarefas, { headers: cabecalhos });
     }
 
     // EDITAR TAREFA
-    if (
-      url.pathname.startsWith("/tarefas/") &&
-      req.method === "PUT"
-    ) {
+    if (url.pathname.startsWith("/tarefas/") && req.method === "PUT") {
       const usuario = buscarUsuario(req);
 
       if (!usuario) {
@@ -694,7 +756,7 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         return respostaErro("ID da tarefa inválido", 400);
       }
 
-      const dados = await req.json() as {
+      const dados = (await req.json()) as {
         subjectId: number;
         title: string;
         description: string;
@@ -702,8 +764,7 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         dueTime: string;
       };
 
-      const { subjectId, title, description, dueDate, dueTime } =
-        dados;
+      const { subjectId, title, description, dueDate, dueTime } = dados;
 
       if (
         !Number.isInteger(Number(subjectId)) ||
@@ -715,12 +776,16 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         return respostaErro("Preencha todos os campos", 400);
       }
 
-      const tarefa = db.query(`
+      const tarefa = db
+        .query(
+          `
         SELECT tasks.id
         FROM tasks
         JOIN teachers ON teachers.id = tasks.teacher_id
         WHERE tasks.id = ? AND teachers.user_id = ?
-      `).get(id, usuario.id);
+      `,
+        )
+        .get(id, usuario.id);
 
       if (!tarefa) {
         return respostaErro("Tarefa não encontrada", 404);
@@ -734,12 +799,14 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         return respostaErro("Matéria não encontrada", 400);
       }
 
-      db.query(`
+      db.query(
+        `
         UPDATE tasks
         SET subject_id = ?, title = ?, description = ?,
             due_date = ?, due_time = ?
         WHERE id = ?
-      `).run(
+      `,
+      ).run(
         Number(subjectId),
         title.trim(),
         description.trim(),
@@ -755,10 +822,7 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
     }
 
     // EXCLUIR TAREFA
-    if (
-      url.pathname.startsWith("/tarefas/") &&
-      req.method === "DELETE"
-    ) {
+    if (url.pathname.startsWith("/tarefas/") && req.method === "DELETE") {
       const usuario = buscarUsuario(req);
 
       if (!usuario) {
@@ -775,13 +839,17 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
         return respostaErro("ID da tarefa inválido", 400);
       }
 
-      const resultado = db.query(`
+      const resultado = db
+        .query(
+          `
         DELETE FROM tasks
         WHERE id = ?
           AND teacher_id IN (
             SELECT id FROM teachers WHERE user_id = ?
           )
-      `).run(id, usuario.id);
+      `,
+        )
+        .run(id, usuario.id);
 
       if (resultado.changes === 0) {
         return respostaErro("Tarefa não encontrada", 404);
@@ -794,7 +862,80 @@ if (req.method === "GET" && url.pathname === "/minhas-tarefas") {
     }
 
     // ROTA PADRÃO
-    return new Response("Sigma ta funcionando", {
+    // SERVIR O FRONTEND
+    const pastaFrontend = resolve(import.meta.dir, "..");
+
+    console.log("Pasta do frontend:", pastaFrontend);
+    console.log(
+      "Index encontrado:",
+      await Bun.file(resolve(pastaFrontend, "index.html")).exists(),
+    );
+
+    const caminhoSolicitado =
+      url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);
+
+    const caminhoArquivo = resolve(pastaFrontend, `.${caminhoSolicitado}`);
+
+    // Impede acesso a arquivos fora da pasta frontend
+    if (
+      caminhoArquivo !== pastaFrontend &&
+      !caminhoArquivo.startsWith(pastaFrontend + sep)
+    ) {
+      return new Response("Acesso negado", {
+        status: 403,
+        headers: cabecalhos,
+      });
+    }
+    // BLOQUEAR ACESSO AOS ARQUIVOS INTERNOS DO BACKEND
+    if (
+      caminhoSolicitado === "/backend" ||
+      caminhoSolicitado.startsWith("/backend/")
+    ) {
+      return new Response("Acesso negado", {
+        status: 403,
+        headers: cabecalhos,
+      });
+    }
+    // PROTEGER AS PÁGINAS DE CADA PERFIL
+
+    // PROTEGER AS PÁGINAS DE CADA PERFIL
+    const caminhoProfessor =
+      caminhoSolicitado.startsWith("/professores/") ||
+      caminhoSolicitado.startsWith("/frontend/professores/");
+
+    const caminhoAluno =
+      caminhoSolicitado.startsWith("/alunos/") ||
+      caminhoSolicitado.startsWith("/frontend/alunos/");
+
+    if (caminhoProfessor || caminhoAluno) {
+      const usuario = buscarUsuario(req);
+
+      if (!usuario) {
+        return Response.redirect(new URL("/", req.url), 302);
+      }
+
+      if (caminhoProfessor && usuario.role !== "professor") {
+        return Response.redirect(new URL("/frontend/alunos/aluno.html", req.url), 302);
+      }
+
+      if (caminhoAluno && usuario.role !== "aluno") {
+        return Response.redirect(
+          new URL("frontend/professores/professor.html", req.url),
+          302,
+        );
+      }
+    }
+
+    const arquivo = Bun.file(caminhoArquivo);
+
+    if (await arquivo.exists()) {
+      return new Response(arquivo, {
+        headers: cabecalhos,
+      });
+    }
+
+    return new Response("Página não encontrada", {
+      status: 404,
       headers: cabecalhos,
     });
   },

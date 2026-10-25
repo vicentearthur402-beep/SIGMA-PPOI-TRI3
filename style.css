@@ -1,7 +1,130 @@
-body {
-  font-family: Arial, Helvetica, sans-serif;
+
+/* ===== SIGMA — LOGIN ===== */
+
+* {
+    box-sizing: border-box;
 }
 
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 30px 20px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #222;
+}
+
+/* Título principal */
+
+h1 {
+    max-width: 600px;
+    margin: 0 0 12px;
+
+    color: #243b55;
+    font-size: 25px;
+    line-height: 1.4;
+    text-align: center;
+}
+
+/* Título Entrar */
+
+h2 {
+    margin: 0 0 24px;
+    color: #243b55;
+    font-size: 21px;
+    font-weight: normal;
+    text-align: center;
+}
+
+/* Campos e etiquetas */
+
+label {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto 6px;
+
+    font-size: 14px;
+    font-weight: bold;
+    text-align: left;
+}
+
+input {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: 38px;
+    margin: 0 auto 16px;
+    padding: 9px 11px;
+
+    border: 1px solid #ccd3dc;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #222;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #243b55;
+    box-shadow: 0 0 0 2px rgb(36 59 85 / 12%);
+}
+
+/* Botão */
+
+button {
+    display: block;
+    width: 180px;
+    height: 38px;
+    margin: 6px auto 0;
+
+    border: none;
+    border-radius: 5px;
+    background-color: #243b55;
+    color: white;
+
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #192d43;
+}
+
+/* Mensagem de login */
+
 #loginMessage {
-  display: none;
+    max-width: 300px;
+    margin: 16px auto 0;
+
+    color: #64748b;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* Celulares */
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 21px;
+    }
+
+    h2 {
+        font-size: 19px;
+    }
+
+    input,
+    label,
+    #loginMessage {
+        max-width: 280px;
+    }
 }

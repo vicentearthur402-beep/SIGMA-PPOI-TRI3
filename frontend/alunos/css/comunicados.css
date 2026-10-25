@@ -1,0 +1,116 @@
+
+/* ===== SIGMA — COMUNICADOS ===== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #222;
+}
+
+/* Cabeçalho */
+h1 {
+    margin: 0;
+    padding: 24px;
+    background-color: #243b55;
+    color: white;
+    font-size: 26px;
+    text-align: center;
+}
+
+/* Navegação */
+nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 20px;
+    background-color: #192d43;
+}
+
+nav a {
+    padding: 9px 13px;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+nav a:hover {
+    background-color: #385675;
+}
+
+/* Conteúdo */
+main {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 28px 20px;
+}
+
+/* Lista de comunicados */
+#listaComunicados {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Cartões gerados pelo JavaScript */
+#listaComunicados > div {
+    padding: 20px;
+    border: 1px solid #e0e4e8;
+    border-left: 4px solid #243b55;
+    border-radius: 7px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgb(0 0 0 / 5%);
+    overflow-wrap: anywhere;
+}
+
+#listaComunicados h2 {
+    margin: 0 0 10px;
+    color: #243b55;
+    font-size: 19px;
+}
+
+#listaComunicados p {
+    margin: 8px 0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+#listaComunicados small {
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+    h1 {
+        padding: 20px 12px;
+        font-size: 22px;
+    }
+
+    nav {
+        gap: 5px;
+        padding: 12px 8px;
+    }
+
+    nav a {
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    main {
+        padding: 20px 12px;
+    }
+
+    #listaComunicados > div {
+        padding: 15px;
+    }
+}

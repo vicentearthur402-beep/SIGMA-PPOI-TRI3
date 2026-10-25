@@ -1,45 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Página de estudante</title>
-</head>
-<body>
-  <header>
-<h1>SIGMA - Sistema Integrado de Gestão e Monitoramento Acadêmico</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/aluno.css">
+    <title>Página de estudante</title>
+  </head>
+  <body>
+    <header>
+      <h1>SIGMA - Sistema Integrado de Gestão e Monitoramento Acadêmico</h1>
 
-<nav>
-  <a href="aluno.html">Ínicio</a>
-  <a href="notas.html">Notas</a>
-  <a href="tarefas.html">Tarefas</a>
-  <a href="provas.html">Provas</a>
-  <a href="comunicados.html">Comunicados</a>
-</nav>
-  </header>
-  <main>
-    <h2> Olá, Lucas Gabriel Conti! </h2>
+      <nav>
+        <a href="aluno.html">Ínicio</a>
+        <a href="notas.html">Notas</a>
+        <a href="tarefas.html">Tarefas</a>
+        <a href="provas.html">Provas</a>
+        <a href="comunicados.html">Comunicados</a>
+      </nav>
+    </header>
+    <main>
+      <h2 id="saudacao">Olá!</h2>
 
-<a href="notas.html">
-    <section>
-      <h3> Notas </h3>
-    </section>
-</a>
-<a href="tarefas.html">
-  <section>
-    <h3> Tarefas </h3>
-  </section>
-</a>
-<a href="provas.html">
-  <section>
-    <h3> Provas </h3>
-  </section>
-</a>
-<a href="comunicados.html">
-  <section>
-    <h3> Comunicados </h3>
-  </section>
-</a>
-  </main>
-</body>
+      <a href="notas.html">
+        <section>
+          <h3>Notas</h3>
+        </section>
+      </a>
+      <a href="tarefas.html">
+        <section>
+          <h3>Tarefas</h3>
+        </section>
+      </a>
+      <a href="provas.html">
+        <section>
+          <h3>Provas</h3>
+        </section>
+      </a>
+      <a href="comunicados.html">
+        <section>
+          <h3>Comunicados</h3>
+        </section>
+      </a>
+    </main>
+    <script>
+      async function carregarUsuario() {
+        try {
+          const resposta = await fetch("/me", {
+            credentials: "include",
+          });
+
+          if (!resposta.ok) {
+            window.location.href = "/";
+            return;
+          }
+
+          const usuario = await resposta.json();
+
+          document.getElementById("saudacao").textContent =
+            `Olá, ${usuario.nome}!`;
+        } catch (erro) {
+          console.error("Erro ao carregar usuário:", erro);
+        }
+      }
+
+      carregarUsuario();
+    </script>
+  </body>
 </html>

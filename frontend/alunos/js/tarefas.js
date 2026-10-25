@@ -6,140 +6,160 @@ const filtroMateria = document.getElementById("filtroMateria");
 
 let tarefas = [];
 
+// CARREGAR TAREFAS DO BACKEND
 async function carregarTarefas() {
-  listaTarefas.textContent = "Carregando tarefas...";
-
   try {
     const resposta = await fetch(`${API}/minhas-tarefas`, {
-      method: "GET",
-      credentials: "include"
+      credentials: "include",
     });
 
-    if (resposta.status === 401) {
-      listaTarefas.textContent =
-        "Sua sessão expirou. Entre novamente no SIGMA.";
-      return;
-    }
-
     if (!resposta.ok) {
-      throw new Error(`Erro HTTP ${resposta.status}`);
+      throw new Error(await resposta.text());
     }
 
     tarefas = await resposta.json();
-
-    carregarMaterias();
-    mostrarTarefasFiltradas();
+    carregarFiltro();
+    mostrarTarefas();
   } catch (erro) {
     console.error("Erro ao carregar tarefas:", erro);
     listaTarefas.textContent =
-      "Não foi possível carregar as tarefas. Verifique se o servidor está funcionando.";
+      "Não foi possível carregar as tarefas. Faça login novamente e tente outra vez.";
   }
 }
 
-function carregarMaterias() {
-  filtroMateria.innerHTML = "";
+// PREENCHER FILTRO DE MATÉRIAS
+function carregarFiltro() {
+  const valorAnterior = filtroMateria.value;
+
+  filtroMateria.replaceChildren();
 
   const todas = document.createElement("option");
   todas.value = "todas";
-  todas.textContent = "Todas";
+  todas.textContent = "Todas as matérias";
   filtroMateria.appendChild(todas);
 
-  const materias = [...new Set(tarefas.map(tarefa => tarefa.materia))];
+  const materias = [...new Set(tarefas.map(t => t.materia))];
 
-  materias.sort((a, b) => a.localeCompare(b, "pt-BR"));
-
-  materias.forEach(materia => {
+  materias.forEach(nome => {
     const opcao = document.createElement("option");
-    opcao.value = materia;
-    opcao.textContent = materia;
+    opcao.value = nome;
+    opcao.textContent = nome;
     filtroMateria.appendChild(opcao);
   });
+
+  if ([...filtroMateria.options].some(o => o.value === valorAnterior)) {
+    filtroMateria.value = valorAnterior;
+  }
 }
 
-function formatarData(data) {
-  if (!data) return "Não informada";
+filtroMateria.addEventListener("change", mostrarTarefas);
 
-  const partes = data.split("-");
+// MOSTRAR TAREFAS
+function mostrarTarefas() {
+  listaTarefas.replaceChildren();
 
-  if (partes.length !== 3) return data;
-
-  return `${partes[2]}/${partes[1]}/${partes[0]}`;
-}
-
-function mostrarTarefasFiltradas() {
-  const materiaSelecionada = filtroMateria.value;
-
-  const filtradas = materiaSelecionada === "todas"
+  const filtradas = filtroMateria.value === "todas"
     ? tarefas
-    : tarefas.filter(
-        tarefa => tarefa.materia === materiaSelecionada
-      );
+    : tarefas.filter(t => t.materia === filtroMateria.value);
 
-  mostrarTarefas(filtradas);
-}
-
-function mostrarTarefas(lista) {
-  listaTarefas.innerHTML = "";
-
-  if (lista.length === 0) {
-    const mensagem = document.createElement("p");
-    mensagem.textContent = tarefas.length === 0
-      ? "Nenhuma tarefa publicada ainda."
-      : "Nenhuma tarefa encontrada para esta matéria.";
-
-    listaTarefas.appendChild(mensagem);
+  if (filtradas.length === 0) {
+    listaTarefas.textContent = "Nenhuma tarefa encontrada.";
     return;
   }
 
-  lista.forEach(tarefa => {
-    const elemento = document.createElement("article");
-
-    const materia = document.createElement("h2");
-    materia.textContent = tarefa.materia;
-    elemento.appendChild(materia);
+  filtradas.forEach(tarefa => {
+    const card = document.createElement("section");
 
     const titulo = document.createElement("h3");
     titulo.textContent = tarefa.titulo;
-    elemento.appendChild(titulo);
+
+    const materia = document.createElement("p");
+    materia.textContent = `Matéria: ${tarefa.materia}`;
 
     const descricao = document.createElement("p");
     descricao.textContent = tarefa.descricao;
-    elemento.appendChild(descricao);
 
-    const professor = document.createElement("p");
-    professor.textContent = `Professor: ${tarefa.professor}`;
-    elemento.appendChild(professor);
+    const prazo = document.createElement("p");
+    prazo.textContent =
+      `Prazo: ${tarefa.dataEntrega} às ${tarefa.horaEntrega}`;
 
-    const entrega = document.createElement("p");
-    entrega.textContent =
-      `Entrega: ${formatarData(tarefa.dataEntrega)} às ${tarefa.horaEntrega}`;
-    elemento.appendChild(entrega);
+    const rotuloArquivo = document.createElement("label");
+    rotuloArquivo.textContent = "Escolha o arquivo do trabalho: ";
 
     const arquivo = document.createElement("input");
     arquivo.type = "file";
-    arquivo.setAttribute("aria-label", `Arquivo para ${tarefa.titulo}`);
-    elemento.appendChild(arquivo);
+    arquivo.accept = ".pdf,.txt,.doc,.docx,.odt,.png,.jpg,.jpeg";
+    arquivo.required = true;
 
-    const botaoEnviar = document.createElement("button");
-    botaoEnviar.type = "button";
-    botaoEnviar.textContent = "Enviar tarefa";
+    const botao = document.createElement("button");
+    botao.type = "button";
+    botao.textContent = "Enviar trabalho";
 
-    botaoEnviar.addEventListener("click", () => {
-      if (arquivo.files.length === 0) {
-        alert("Selecione um arquivo primeiro.");
+    const mensagem = document.createElement("p");
+    mensagem.setAttribute("role", "status");
+
+    botao.addEventListener("click", async () => {
+      const selecionado = arquivo.files[0];
+
+      if (!selecionado) {
+        mensagem.textContent = "Selecione um arquivo primeiro.";
         return;
       }
 
-      alert(
-        "A tarefa já aparece no SIGMA! O envio real do arquivo ainda precisa ser conectado ao servidor."
-      );
+      if (selecionado.size === 0) {
+        mensagem.textContent = "O arquivo está vazio.";
+        return;
+      }
+
+      if (selecionado.size > 10 * 1024 * 1024) {
+        mensagem.textContent = "O arquivo deve ter no máximo 10 MB.";
+        return;
+      }
+
+      const formulario = new FormData();
+      formulario.append("arquivo", selecionado);
+
+      botao.disabled = true;
+      mensagem.textContent = "Enviando arquivo...";
+
+      try {
+        const resposta = await fetch(
+          `${API}/tarefas/${tarefa.id}/envios`,
+          {
+            method: "POST",
+            credentials: "include",
+            body: formulario,
+          }
+        );
+
+        if (!resposta.ok) {
+          throw new Error(await resposta.text());
+        }
+
+        const resultado = await resposta.json();
+        mensagem.textContent =
+          resultado.mensagem || "Trabalho enviado com sucesso!";
+
+        arquivo.value = "";
+      } catch (erro) {
+        console.error("Erro ao enviar trabalho:", erro);
+        mensagem.textContent = "Falha no envio: " + erro.message;
+      } finally {
+        botao.disabled = false;
+      }
     });
 
-    elemento.appendChild(botaoEnviar);
-    listaTarefas.appendChild(elemento);
+    card.appendChild(titulo);
+    card.appendChild(materia);
+    card.appendChild(descricao);
+    card.appendChild(prazo);
+    card.appendChild(rotuloArquivo);
+    card.appendChild(arquivo);
+    card.appendChild(botao);
+    card.appendChild(mensagem);
+
+    listaTarefas.appendChild(card);
   });
 }
-
-filtroMateria.addEventListener("change", mostrarTarefasFiltradas);
 
 carregarTarefas();

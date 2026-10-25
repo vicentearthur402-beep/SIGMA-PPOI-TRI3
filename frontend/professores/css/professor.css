@@ -1,0 +1,223 @@
+
+/* ===== SIGMA — PÁGINA INICIAL DO PROFESSOR ===== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #222;
+}
+
+/* Cabeçalho */
+h1 {
+    margin: 0;
+    padding: 24px;
+    background-color: #243b55;
+    color: white;
+    font-size: 26px;
+    text-align: center;
+}
+
+/* Navegação */
+nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 20px;
+    background-color: #192d43;
+}
+
+nav a {
+    padding: 9px 13px;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+nav a:hover {
+    background-color: #385675;
+}
+
+/* Conteúdo principal */
+main {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 20px;
+}
+
+/* Títulos */
+h2 {
+    margin: 0 0 18px;
+    color: #243b55;
+    font-size: 22px;
+}
+
+h3 {
+    margin-top: 0;
+    color: #243b55;
+    font-size: 18px;
+}
+
+/* Seções e cartões */
+section,
+.card {
+    margin-bottom: 20px;
+    padding: 22px;
+    border: 1px solid #e0e4e8;
+    border-radius: 7px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgb(0 0 0 / 5%);
+}
+
+/* Textos */
+p {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Formulários */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 650px;
+    margin-bottom: 25px;
+    padding: 22px;
+    border: 1px solid #e0e4e8;
+    border-radius: 7px;
+    background-color: white;
+}
+
+label {
+    margin-top: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccd3dc;
+    border-radius: 5px;
+    background-color: white;
+    color: #222;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #243b55;
+    box-shadow: 0 0 0 2px rgb(36 59 85 / 10%);
+}
+
+textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+/* Botões */
+button {
+    align-self: flex-start;
+    margin-top: 10px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 5px;
+    background-color: #243b55;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #192d43;
+}
+
+/* Tabelas */
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+th,
+td {
+    padding: 12px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+th {
+    background-color: #e5e5e5;
+}
+
+td:first-child,
+th:first-child {
+    text-align: left;
+}
+
+/* Links dentro do conteúdo */
+main a {
+    color: #243b55;
+}
+
+main a:hover {
+    color: #41678e;
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+    h1 {
+        padding: 20px 12px;
+        font-size: 22px;
+    }
+
+    nav {
+        gap: 5px;
+        padding: 12px 8px;
+    }
+
+    nav a {
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    main {
+        padding: 20px 12px;
+    }
+
+    section,
+    .card,
+    form {
+        padding: 15px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    th,
+    td {
+        padding: 7px 4px;
+    }
+}
