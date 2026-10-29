@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Provas - SIGMA</title>
+    <link rel="stylesheet" href="css/provas.css">
+    <link rel="stylesheet" href="css/sigma.css">
+</head>
+<body>
+    <header>
+        <h1>SIGMA</h1>
+        <h2>Gerenciar Provas</h2>
+    </header>
+
+        <nav>
+    <a href="professor.html">Início</a>
+    <a href="notas.html">Notas</a>
+    <a href="tarefas.html">Tarefas</a>
+    <a href="provas.html">Provas</a>
+    <a href="comunicados.html">Comunicados</a>
+    <button type="button" id="btnSair">Sair</button>
+</nav>
+
+    <main>
+        <section>
+            <h2 id="tituloFormulario">Nova Prova</h2>
+
+            <form id="formProva">
+                <label for="materia">Matéria:</label>
+                <select id="materia" required>
+                    <option value="">Carregando matérias...</option>
+                </select>
+
+                <label for="titulo">Título da prova:</label>
+                <input
+                    type="text"
+                    id="titulo"
+                    placeholder="Ex.: Prova de Matrizes"
+                    required
+                >
+
+                <label for="dataProva">Data:</label>
+                <input type="date" id="dataProva" required>
+
+                <label for="horaProva">Horário:</label>
+                <input type="time" id="horaProva" required>
+
+                <button type="submit" id="publicarProva">
+                    Publicar prova
+                </button>
+
+                <button type="button" id="cancelarEdicao" hidden>
+                    Cancelar edição
+                </button>
+
+                <p id="mensagem" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <section>
+            <h2>Provas publicadas</h2>
+            <div id="listaProvas">
+                <p>Carregando provas...</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/provas.js"></script>
+</body>
+</html>

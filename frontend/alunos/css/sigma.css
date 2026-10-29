@@ -1,0 +1,319 @@
+
+/* ========================================
+   SIGMA - ESTILO PADRÃO
+   ======================================== */
+
+/* Configurações gerais */
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --azul-principal: #243b55;
+    --azul-escuro: #192d43;
+    --azul-hover: #385675;
+    --fundo: #f5f5f5;
+    --branco: #ffffff;
+    --borda: #d1d5db;
+    --texto: #222222;
+    --texto-secundario: #555555;
+    --vermelho: #a83232;
+    --verde: #237443;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--fundo);
+    color: var(--texto);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Cabeçalho */
+header {
+    background-color: var(--azul-principal);
+    color: var(--branco);
+    padding: 22px 30px;
+    border-bottom: 4px solid var(--azul-escuro);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+header h2,
+header p {
+    margin: 6px 0 0;
+    font-size: 17px;
+    font-weight: normal;
+}
+
+/* Barra de navegação */
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    background-color: var(--azul-escuro);
+    padding: 0 20px;
+    border-bottom: 1px solid #111f2e;
+}
+
+nav a,
+nav button {
+    display: inline-block;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--branco);
+    font-family: inherit;
+    font-size: 15px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+nav a:hover,
+nav button:hover {
+    background-color: var(--azul-hover);
+}
+
+nav a:focus-visible,
+nav button:focus-visible {
+    outline: 2px solid var(--branco);
+    outline-offset: -4px;
+}
+
+/* Botão de sair */
+nav #btnSair {
+    margin-left: auto;
+    background-color: var(--vermelho);
+}
+
+nav #btnSair:hover {
+    background-color: #842727;
+}
+
+/* Área principal */
+main {
+    width: min(1100px, calc(100% - 40px));
+    margin: 30px auto;
+}
+
+main h1,
+main h2,
+main h3 {
+    color: var(--azul-principal);
+}
+
+main h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 23px;
+}
+
+/* Seções, formulários e cartões */
+section,
+.card,
+.formulario,
+.lista {
+    margin-bottom: 24px;
+    padding: 22px;
+    background-color: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 0;
+    box-shadow: 0 2px 5px rgb(0 0 0 / 6%);
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    min-height: 40px;
+    margin-bottom: 16px;
+    padding: 9px 10px;
+    border: 1px solid #aeb7c2;
+    border-radius: 0;
+    background-color: var(--branco);
+    color: var(--texto);
+    font: inherit;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #8ba8c7;
+    outline-offset: 1px;
+    border-color: var(--azul-principal);
+}
+
+/* Botões gerais */
+button,
+input[type="submit"] {
+    padding: 10px 18px;
+    border: 1px solid var(--azul-escuro);
+    border-radius: 0;
+    background-color: var(--azul-principal);
+    color: var(--branco);
+    font: inherit;
+    cursor: pointer;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background-color: var(--azul-hover);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Botões de ações e exclusão */
+.acoes,
+.acoes-prova {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+button.excluir,
+button.btn-excluir {
+    background-color: var(--vermelho);
+    border-color: var(--vermelho);
+}
+
+/* Tabelas */
+table {
+    width: 100%;
+    margin: 18px 0;
+    border-collapse: collapse;
+    background-color: var(--branco);
+}
+
+th,
+td {
+    padding: 11px 12px;
+    border: 1px solid var(--borda);
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    background-color: #e5e9ee;
+    color: var(--azul-escuro);
+    font-weight: 700;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+tbody tr:hover {
+    background-color: #edf2f7;
+}
+
+/* Listas e mensagens */
+ul {
+    padding-left: 24px;
+}
+
+#mensagem,
+#mensagemSalvamento {
+    margin-top: 12px;
+}
+
+.erro {
+    color: var(--vermelho);
+}
+
+.sucesso {
+    color: var(--verde);
+}
+
+/* Links do conteúdo */
+main a {
+    color: var(--azul-principal);
+}
+
+main a:hover {
+    color: var(--azul-hover);
+}
+
+/* Imagens e conteúdo extenso */
+img {
+    max-width: 100%;
+}
+
+table {
+    overflow-wrap: anywhere;
+}
+
+/* Adaptação para celulares */
+@media (max-width: 700px) {
+    header {
+        padding: 18px;
+    }
+
+    header h1 {
+        font-size: 22px;
+    }
+
+    nav {
+        padding: 0;
+    }
+
+    nav a,
+    nav button {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    nav #btnSair {
+        margin-left: 0;
+    }
+
+    main {
+        width: calc(100% - 24px);
+        margin: 20px auto;
+    }
+
+    section,
+    .card,
+    .formulario,
+    .lista {
+        padding: 15px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .acoes,
+    .acoes-prova {
+        flex-direction: column;
+    }
+
+    .acoes button,
+    .acoes-prova button {
+        width: 100%;
+    }
+}

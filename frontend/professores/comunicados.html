@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGMA - Comunicados</title>
+    <link rel="stylesheet" href="css/comunicados.css">
+    <link rel="stylesheet" href="css/sigma.css">
+</head>
+<body>
+    <header>
+        <h1>SIGMA</h1>
+        <p>Comunicados do Professor</p>
+                <nav>
+    <a href="professor.html">Início</a>
+    <a href="notas.html">Notas</a>
+    <a href="tarefas.html">Tarefas</a>
+    <a href="provas.html">Provas</a>
+    <a href="comunicados.html">Comunicados</a>
+    <button type="button" id="btnSair">Sair</button>
+</nav>
+    </header>
+
+    <main>
+        <section class="formulario">
+            <h2 id="tituloFormulario">Publicar comunicado</h2>
+
+            <form id="formComunicado">
+                <label for="titulo">Título do comunicado</label>
+                <input
+                    type="text"
+                    id="titulo"
+                    maxlength="150"
+                    placeholder="Ex.: Alteração no horário da prova"
+                    required
+                >
+
+                <label for="conteudo">Mensagem</label>
+                <textarea
+                    id="conteudo"
+                    rows="6"
+                    maxlength="5000"
+                    placeholder="Escreva o comunicado para os alunos..."
+                    required
+                ></textarea>
+
+                <div class="botoes">
+                    <button type="submit" id="publicar">
+                        Publicar comunicado
+                    </button>
+
+                    <button type="button" id="cancelarEdicao" hidden>
+                        Cancelar edição
+                    </button>
+                </div>
+
+                <p id="mensagem" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <section class="lista">
+            <h2>Meus comunicados</h2>
+            <div id="listaComunicados">
+                <p>Carregando comunicados...</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/comunicados.js"></script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+/* ===== SIGMA — GERENCIAR PROVAS ===== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #222;
+}
+
+/* Cabeçalho */
+header {
+    padding: 22px 20px;
+    background-color: #243b55;
+    color: white;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    letter-spacing: 1px;
+}
+
+header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: normal;
+}
+
+/* Menu de navegação */
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background-color: white;
+    border-bottom: 1px solid #e0e4e8;
+}
+
+nav a {
+    padding: 9px 12px;
+    border-radius: 5px;
+    color: #243b55;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+nav a:hover {
+    background-color: #edf1f5;
+}
+
+/* Área principal */
+main {
+    width: 100%;
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 28px;
+    border: 1px solid #e0e4e8;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 5%);
+}
+
+/* Títulos das seções */
+main section h2 {
+    margin: 28px 0 16px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #e0e4e8;
+    color: #243b55;
+    font-size: 19px;
+}
+
+main section:first-child h2 {
+    margin-top: 0;
+}
+
+/* Rótulos */
+label {
+    display: block;
+    margin: 14px 0 7px;
+    color: #344256;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Campos */
+input,
+select,
+textarea {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-height: 40px;
+    padding: 10px 12px;
+    border: 1px solid #ccd3dc;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #222;
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #243b55;
+    box-shadow: 0 0 0 3px rgb(36 59 85 / 10%);
+}
+
+/* Botão de publicação */
+button {
+    display: inline-block;
+    min-height: 40px;
+    margin-top: 18px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #243b55;
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+button:hover {
+    background-color: #192d43;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Mensagens */
+#mensagem {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+/* Lista de provas publicadas */
+#listaProvas {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+/* Cartões das provas gerados pelo JavaScript */
+#listaProvas > article,
+#listaProvas > div {
+    padding: 18px;
+    border: 1px solid #e0e4e8;
+    border-left: 4px solid #243b55;
+    border-radius: 6px;
+    background-color: #fafbfd;
+    overflow-wrap: anywhere;
+}
+
+#listaProvas h3 {
+    margin: 0 0 10px;
+    padding: 0;
+    border: none;
+    color: #243b55;
+    font-size: 17px;
+}
+
+#listaProvas p {
+    margin: 8px 0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+#listaProvas small {
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* Adaptação para celulares */
+@media (max-width: 600px) {
+    header {
+        padding: 20px 12px;
+    }
+
+    header h1 {
+        font-size: 23px;
+    }
+
+    header h2 {
+        font-size: 18px;
+    }
+
+    nav {
+        padding: 10px 8px;
+        gap: 4px;
+    }
+
+    nav a {
+        font-size: 13px;
+    }
+
+    main {
+        width: calc(100% - 24px);
+        margin: 16px auto;
+        padding: 18px;
+    }
+
+    main section h2 {
+        font-size: 17px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    #listaProvas > article,
+    #listaProvas > div {
+        padding: 14px;
+    }
+}
+
+/* Botões de ação das provas */
+.acoes-prova {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.acoes-prova button {
+    min-height: 34px;
+    margin-top: 0;
+    padding: 8px 13px;
+    font-size: 13px;
+}
+
+.botao-editar {
+    background-color: #243b55;
+}
+
+.botao-editar:hover {
+    background-color: #192d43;
+}
+
+.botao-excluir {
+    background-color: #b42318;
+}
+
+.botao-excluir:hover {
+    background-color: #8f1d14;
+}
+
+@media (max-width: 600px) {
+    .acoes-prova {
+        flex-direction: column;
+    }
+
+    .acoes-prova button {
+        width: 100%;
+    }
+}
+
+/* Botões de ação das provas */
+.acoes-prova {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.acoes-prova button {
+    min-height: 34px;
+    margin-top: 0;
+    padding: 8px 13px;
+    font-size: 13px;
+}
+
+.botao-editar {
+    background-color: #243b55;
+}
+
+.botao-editar:hover {
+    background-color: #192d43;
+}
+
+.botao-excluir {
+    background-color: #b42318;
+}
+
+.botao-excluir:hover {
+    background-color: #8f1d14;
+}
+
+@media (max-width: 600px) {
+    .acoes-prova {
+        flex-direction: column;
+    }
+
+    .acoes-prova button {
+        width: 100%;
+    }
+}

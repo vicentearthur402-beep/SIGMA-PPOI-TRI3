@@ -1,48 +1,62 @@
+
 const listaComunicados = document.getElementById("listaComunicados");
 
-const comunicados = [
-  {
-    titulo: "Reunião dos pais",
-    mensagem: "A Reunião dos pais será realizado no dia 67 pelo professor Gerivaldo",
-    data: "02/09/2026",
-    professor: "Diretor sem nome"
-  },
-  {
-    titulo: "Vandalismo",
-    mensagem: "Será realizado uma palestra com os estudantes em relação a subir na tampa do vaso",
-    data: "03/09/2026",
-    professor: "carinha da manutenção"
+async function buscarComunicados() {
+  listaComunicados.innerHTML = "<p>Carregando comunicados...</p>";
+
+  try {
+    const resposta = await fetch(
+      "http://127.0.0.1:3000/aluno/comunicados",
+      {
+        method: "GET",
+        credentials: "include"
+      }
+    );
+
+    if (!resposta.ok) {
+      throw new Error("Não foi possível carregar os comunicados.");
+    }
+
+    const comunicados = await resposta.json();
+
+    mostrarComunicados(comunicados);
+  } catch (erro) {
+    console.error(erro);
+    listaComunicados.textContent =
+      "Erro ao carregar os comunicados. Tente novamente.";
   }
-]
-
-comunicados.sort(function(a,b){
-  const dataA = new Date(a.data.split("/").reverse().join("-"));
-  const dataB = new Date(b.data.split("/").reverse().join("-"));
-  return dataB - dataA;
-})
-
-function mostrarComunicados(lista) {
-  listaComunicados.innerHTML = "";
-  lista.forEach(function(comunicado) {
-    const comunicadoElemento = document.createElement("div");
-    listaComunicados.appendChild(comunicadoElemento);
-
-    const titulo = document.createElement("h2");
-    titulo.textContent = comunicado.titulo;
-    comunicadoElemento.append(titulo);
-
-    const mensagem = document.createElement("h3");
-    mensagem.textContent = comunicado.mensagem;
-    comunicadoElemento.append(mensagem)
-
-    const data = document.createElement("p")
-    data.textContent = comunicado.data
-    comunicadoElemento.append(data)
-
-    const professor = document.createElement("p")
-    professor.textContent = comunicado.professor;
-    comunicadoElemento.append(professor);
-  })
 }
 
-mostrarComunicados(comunicados);
+function mostrarComunicados(comunicados) {
+  listaComunicados.innerHTML = "";
+
+  if (comunicados.length === 0) {
+    listaComunicados.textContent =
+      "Nenhum comunicado publicado ainda.";
+    return;
+  }
+
+  comunicados.forEach(function(comunicado) {
+    const elemento = document.createElement("div");
+
+    const titulo = document.createElement("h2");
+    titulo.textContent = comunicado.title;
+
+    const mensagem = document.createElement("p");
+    mensagem.textContent = comunicado.content;
+
+    const data = document.createElement("p");
+    data.textContent = new Date(
+      comunicado.published_at
+    ).toLocaleString("pt-BR");
+
+    const professor = document.createElement("p");
+    professor.textContent =
+      "Publicado por: " + (comunicado.professor || "Professor");
+
+    elemento.append(titulo, mensagem, data, professor);
+    listaComunicados.appendChild(elemento);
+  });
+}
+
+buscarComunicados();

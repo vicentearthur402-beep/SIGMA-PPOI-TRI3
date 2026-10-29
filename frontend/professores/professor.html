@@ -1,63 +1,91 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="css/professor.css">
-    <title>Área do Professor</title>
-  </head>
 
-  <body>
-    <header>
-      <h1>SIGMA</h1>
-      <h2>Área do Professor</h2>
-    </header>
-    <h2 id="saudacao">Olá!</h2>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/professor.css">
+  <link rel="stylesheet" href="css/sigma.css">
+  <title>Área do Professor</title>
+</head>
 
-    <main>
-      <a href="notas.html">
-        <section>
-          <h3>Lançar Notas</h3>
-        </section>
-      </a>
-      <a href="tarefas.html">
-        <section>
-          <h3>Gerenciar Tarefas</h3>
-        </section>
-      </a>
-      <a href="provas.html">
-        <section>
-          <h3>Gerenciar Provas</h3>
-        </section>
-      </a>
-      <a href="comunicados.html">
-        <section>
-          <h3>Publicar Comunicados</h3>
-        </section>
-      </a>
-    </main>
-    <script>
-      async function carregarUsuario() {
-        try {
-          const resposta = await fetch("/me", {
-            credentials: "include",
-          });
+<body>
+  <header>
+    <h1>SIGMA</h1>
+    <h2>Área do Professor</h2>
+    
+  </header>
+            <nav>
+    <a href="professor.html">Início</a>
+    <a href="notas.html">Notas</a>
+    <a href="tarefas.html">Tarefas</a>
+    <a href="provas.html">Provas</a>
+    <a href="comunicados.html">Comunicados</a>
+    <button type="button" id="btnSair">Sair</button>
+</nav>
+  <h2 id="saudacao">Olá!</h2>
+  <main>
+    <a href="notas.html">
+      <section>
+        <h3>Lançar Notas</h3>
+      </section>
+    </a>
+    <a href="tarefas.html">
+      <section>
+        <h3>Gerenciar Tarefas</h3>
+      </section>
+    </a>
+    <a href="provas.html">
+      <section>
+        <h3>Gerenciar Provas</h3>
+      </section>
+    </a>
+    <a href="comunicados.html">
+      <section>
+        <h3>Publicar Comunicados</h3>
+      </section>
+    </a>
+  </main>
+  <script>
+    async function carregarUsuario() {
+      try {
+        const resposta = await fetch("/me", {
+          credentials: "include",
+        });
 
-          if (!resposta.ok) {
-            window.location.href = "/";
-            return;
-          }
-
-          const usuario = await resposta.json();
-
-          document.getElementById("saudacao").textContent =
-            `Olá, ${usuario.nome}!`;
-        } catch (erro) {
-          console.error("Erro ao carregar usuário:", erro);
+        if (!resposta.ok) {
+          window.location.href = "/";
+          return;
         }
-      }
 
-      carregarUsuario();
-    </script>
-  </body>
+        const usuario = await resposta.json();
+
+        document.getElementById("saudacao").textContent =
+          `Olá, ${usuario.nome}!`;
+      } catch (erro) {
+        console.error("Erro ao carregar usuário:", erro);
+      }
+    }
+    document.getElementById("btnSair").addEventListener("click", async () => {
+      try {
+        const resposta = await fetch("/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!resposta.ok) {
+          alert("Não foi possível encerrar a sessão.");
+          return;
+        }
+
+        window.location.href = "/";
+      } catch (erro) {
+        console.error("Erro ao sair:", erro);
+        alert("Erro de conexão ao tentar sair.");
+      }
+    });
+    carregarUsuario();
+  </script>
+</body>
+
 </html>

@@ -1,54 +1,66 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Tarefas</title>
     <link rel="stylesheet" href="css/tarefas.css">
+    <link rel="stylesheet" href="css/sigma.css">
 </head>
+
 <body>
 
-<header>
-    <h1>SIGMA</h1>
-    <h2>Gerenciar Tarefas</h2>
-</header>
+    <header>
+        <h1>SIGMA</h1>
+        <nav>
+            <a href="professor.html">Início</a>
+            <a href="notas.html">Notas</a>
+            <a href="tarefas.html">Tarefas</a>
+            <a href="provas.html">Provas</a>
+            <a href="comunicados.html">Comunicados</a>
+            <button type="button" id="btnSair">Sair</button>
+        </nav>
+        <h2>Gerenciar Tarefas</h2>
+    </header>
 
-<main>
-  <label for="materia">Materia:</label>
-  <select id="materia">
-     <option value="">Carregando matérias...</option>
-  </select>
+    <main>
+        <label for="materia">Materia:</label>
+        <select id="materia">
+            <option value="">Carregando matérias...</option>
+        </select>
 
-  <h3>Nova Tarefa</h3>
+        <h3>Nova Tarefa</h3>
 
-<label for="titulo">Título:</label>
-<input type="text" id="titulo">
+        <label for="titulo">Título:</label>
+        <input type="text" id="titulo">
 
-<br><br>
+        <br><br>
 
-<label for="descricao">Descrição:</label>
-<textarea id="descricao"></textarea>
+        <label for="descricao">Descrição:</label>
+        <textarea id="descricao"></textarea>
 
-<br><br>
+        <br><br>
 
-<label for="dataEntrega">Data:</label>
-<input type="date" id="dataEntrega">
+        <label for="dataEntrega">Data:</label>
+        <input type="date" id="dataEntrega">
 
-<br><br>
+        <br><br>
 
-<label for="horaEntrega">Hora:</label>
-<input type="time" id="horaEntrega">
+        <label for="horaEntrega">Hora:</label>
+        <input type="time" id="horaEntrega">
 
-<br><br>
+        <br><br>
 
-<button id="publicarTarefa">Publicar Tarefa</button>
+        <button id="publicarTarefa">Publicar Tarefa</button>
 
-<h3>Tarefas Publicadas</h3>
+        <h3>Tarefas Publicadas</h3>
 
-<div id="listaTarefas"></div>
+        <div id="listaTarefas"></div>
 
 
-</main>
-<script src="js/tarefas.js"></script>
+    </main>
+    <script src="js/tarefas.js"></script>
 </body>
+
 </html>

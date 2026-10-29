@@ -1,0 +1,145 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    color: #243b55;
+}
+
+header {
+    background: #243b55;
+    color: white;
+    padding: 22px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 8px;
+}
+
+header p {
+    margin: 0;
+}
+
+main {
+    width: min(850px, 92%);
+    margin: 30px auto;
+}
+
+.formulario,
+.lista {
+    background: white;
+    padding: 24px;
+    margin-bottom: 24px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #00000012;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin: 18px 0 8px;
+    font-weight: bold;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font: inherit;
+}
+
+textarea {
+    resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+    outline: 2px solid #567da8;
+    border-color: transparent;
+}
+
+.botoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+button {
+    border: none;
+    border-radius: 6px;
+    padding: 11px 16px;
+    background: #243b55;
+    color: white;
+    font: inherit;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.88;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+#cancelarEdicao,
+.btn-excluir {
+    background: #777;
+}
+
+.comunicado {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 16px;
+    overflow-wrap: anywhere;
+}
+
+.comunicado h3 {
+    margin-top: 0;
+}
+
+.data-comunicado {
+    color: #666;
+    font-size: 13px;
+}
+
+.texto-comunicado {
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+#mensagem {
+    margin-bottom: 0;
+}
+
+#mensagem.erro {
+    color: #b42318;
+}
+
+#mensagem.sucesso {
+    color: #18733b;
+}
+
+[hidden] {
+    display: none !important;
+}

@@ -1,89 +1,110 @@
-const listaComunicados = document.getElementById("listaProvas")
-const filtroMateria = document.getElementById("filtroMateria")
+const API = "http://127.0.0.1:3000";
 
-const provas = [
-  {
-    materia: "Matemática",
-    titulo: "Prova de Matrizes",
-    conteudo: "Matrizes e determinantes",
-    data: "15/09/2026",
-    horario: "08:00"
-  },
-  {
-    materia: "História",
-    titulo: "Prova de História do Brasil",
-    conteudo: "Período Colonial e Independência",
-    data: "10/09/2026",
-    horario: "10:00"
-   },
-   {
-    materia: "Língua Inglesa",
-    titulo: "English Test",
-    conteudo: "Simple Past e Present Perfect",
-    data: "20/09/2026",
-    horario: "08:00"
-   } 
-]
+const listaProvas = document.getElementById("listaProvas");
+const filtroMateria = document.getElementById("filtroMateria");
 
-provas.sort(function(a, b) {
-  const dataA = new Date(a.data.split("/").reverse().join("-") + "T" +a.horario)
-  const dataB = new Date(b.data.split("/").reverse().join("-") + "T" +b.horario)
-  return dataA - dataB;
-})
+let provas = [];
 
-const materias = new Set();
+async function carregarProvas() {
+    try {
+        listaProvas.textContent = "Carregando provas...";
 
-provas.forEach(function(prova){
-  materias.add(prova.materia);
-});
+        const resposta = await fetch(`${API}/minhas-provas`, {
+            credentials: "include"
+        });
 
-materias.forEach(function(materia) {
-  const opMateria = document.createElement("option");
-    opMateria.textContent = materia;
-    opMateria.value = materia;
-    filtroMateria.appendChild(opMateria);
-})
+        if (!resposta.ok) {
+            throw new Error("Não foi possível carregar as provas.");
+        }
+
+        provas = await resposta.json();
+
+        // Ordena as provas por data e horário
+        provas.sort(function(a, b) {
+            const dataA = new Date(`${a.data}T${a.horario}`);
+            const dataB = new Date(`${b.data}T${b.horario}`);
+
+            return dataA - dataB;
+        });
+
+        carregarMaterias();
+        mostrarProvas(provas);
+
+    } catch (erro) {
+        listaProvas.textContent = erro.message;
+    }
+}
+
+function carregarMaterias() {
+    filtroMateria.replaceChildren();
+
+    const opcaoTodas = document.createElement("option");
+    opcaoTodas.value = "todas";
+    opcaoTodas.textContent = "TODAS";
+
+    filtroMateria.appendChild(opcaoTodas);
+
+    const materias = new Set();
+
+    provas.forEach(function(prova) {
+        materias.add(prova.materia);
+    });
+
+    materias.forEach(function(materia) {
+        const opcao = document.createElement("option");
+
+        opcao.value = materia;
+        opcao.textContent = materia;
+
+        filtroMateria.appendChild(opcao);
+    });
+}
 
 filtroMateria.addEventListener("change", function() {
     const materiaSelecionada = filtroMateria.value;
-  if (materiaSelecionada === "todas") {
-    mostrarProvas(provas);
-  }
-  else {
-  const provasFiltradas = provas.filter(function(prova) {
-    return prova.materia === materiaSelecionada;
-  });
-  mostrarProvas(provasFiltradas);
-}
+
+    if (materiaSelecionada === "todas") {
+        mostrarProvas(provas);
+    } else {
+        const provasFiltradas = provas.filter(function(prova) {
+            return prova.materia === materiaSelecionada;
+        });
+
+        mostrarProvas(provasFiltradas);
+    }
 });
 
-function mostrarProvas(lista) {
-  listaComunicados.innerHTML = "";
-  lista.forEach(function(prova) {
-    const provaElemento = document.createElement("div");
-    listaComunicados.appendChild(provaElemento);
-
-    const materia = document.createElement("h2");
-    materia.textContent = prova.materia;
-    provaElemento.append(materia);
-
-    const titulo = document.createElement("h3");
-    titulo.textContent = prova.titulo;
-    provaElemento.append(titulo)
-
-    const conteudo = document.createElement("h4")
-    conteudo.textContent = prova.conteudo
-    provaElemento.append(conteudo)
-
-    const data = document.createElement("p")
-    data.textContent = prova.data
-    provaElemento.append(data)
-
-    const horario = document.createElement("p")
-    horario.textContent = prova.horario;
-    provaElemento.append(horario);
-
-  })
+function formatarData(data) {
+    const [ano, mes, dia] = data.split("-");
+    return `${dia}/${mes}/${ano}`;
 }
 
-mostrarProvas(provas)
+function mostrarProvas(lista) {
+    listaProvas.replaceChildren();
+
+    if (lista.length === 0) {
+        listaProvas.textContent = "Nenhuma prova encontrada.";
+        return;
+    }
+
+    lista.forEach(function(prova) {
+        const provaElemento = document.createElement("div");
+
+        const materia = document.createElement("h2");
+        materia.textContent = prova.materia;
+
+        const titulo = document.createElement("h3");
+        titulo.textContent = prova.titulo;
+
+        const data = document.createElement("p");
+        data.textContent = `Data: ${formatarData(prova.data)}`;
+
+        const horario = document.createElement("p");
+        horario.textContent = `Horário: ${prova.horario}`;
+
+        provaElemento.append(materia, titulo, data, horario);
+        listaProvas.appendChild(provaElemento);
+    });
+}
+
+carregarProvas();
